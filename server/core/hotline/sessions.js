@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { liveRequest, attachLive } from '../../services/openaiLive.js'
 import { hotlineTools, newHarnessContext, runTool, saveDraft, publicDraft, assertVerified } from './harness.js'
 import { readClaim, assertHotlineReady } from '../../repositories/hotlineClaims.js'
@@ -6,6 +6,7 @@ import { readClaim, assertHotlineReady } from '../../repositories/hotlineClaims.
 const owners = new Map()
 const limits = new Map()
 const fail = (code, statusCode = 400) => { throw Object.assign(new Error(code), { code, statusCode }) }
+const hash = value => createHash('sha256').update(value).digest()
 const allowedErrors = new Set(['DATABASE_NOT_CONFIGURED', 'DATABASE_UNAVAILABLE', 'DEMO_SCHEMA_MISSING', 'DEMO_RECORD_MISSING', 'DRAFT_STALE', 'CLAIM_CLOSED', 'CUSTOMER_VERIFICATION_REQUIRED', 'VERIFICATION_LOCKED', 'CHALLENGE_REQUIRED', 'BROWSER_CONFIRMATION_REQUIRED', 'INVALID_TOOL_ARGUMENTS', 'OFFICIAL_SOURCE_UNAVAILABLE'])
 const codeFor = error => allowedErrors.has(error?.code) ? error.code : 'TOOL_FAILED'
 function send(session, event) {
@@ -17,6 +18,7 @@ export function checkOrigin(config, origin, site) {
 }
 function configured(config) {
   if (config.hotlineEnabled !== true && config.hotlineEnabled !== 'true') fail('HOTLINE_DISABLED', 503)
+  if (typeof config.hotlineAccessToken !== 'string' || config.hotlineAccessToken.length < 32 || config.hotlineAccessToken.length > 256) fail('HOTLINE_NOT_CONFIGURED', 503)
 }
 export function limit(key, max, period) {
   const now = Date.now()
@@ -28,17 +30,14 @@ export function limit(key, max, period) {
   }
   if (++entry.count > max) fail('HOTLINE_RATE_LIMITED', 429)
 }
-export function admitBrowser(config, capability, ip) {
+export function authorize(config, token, ip) {
   configured(config)
-  const existing = owners.get(capability)
-  if (existing && existing.expiresAt > Date.now()) return { capability, created: false }
-  limit(`admit:${ip}`, 30, 10 * 60 * 1000)
+  limit(`auth:${ip}`, 8, 10 * 60 * 1000)
+  if (typeof token !== 'string' || token.length > 256 || !timingSafeEqual(hash(token), hash(config.hotlineAccessToken))) fail('HOTLINE_ACCESS_DENIED', 403)
   if (owners.size >= 200) fail('HOTLINE_RATE_LIMITED', 429)
-  const issued = randomBytes(32).toString('hex')
-  // Public admission isolates browser calls; it does not verify a policyholder
-  // or grant access to any customer, claim or supporting document.
-  owners.set(issued, { expiresAt: Date.now() + 60 * 60 * 1000, session: null })
-  return { capability: issued, created: true }
+  const capability = randomBytes(32).toString('hex')
+  owners.set(capability, { expiresAt: Date.now() + 60 * 60 * 1000, session: null })
+  return capability
 }
 export function ownerFor(config, capability) {
   configured(config)
