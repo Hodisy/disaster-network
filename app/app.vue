@@ -1,7 +1,8 @@
 <script setup>
 const { locale, setLocale, t } = useAppI18n()
 const route = useRoute()
-const { state, reset, stopCall } = useDemo()
+const isMarketingPage = computed(() => route.meta.marketing === true)
+const { state, stopCall } = useDemo()
 const active = computed(() => route.path.split('/')[1] || 'hotline')
 const account = computed(() => active.value === 'insurer' ? 'insurer' : 'client')
 
@@ -11,7 +12,6 @@ async function switchAccount(value) {
   if (value === 'insurer') await navigateTo('/insurer')
   else if (account.value === 'insurer') await navigateTo(state.value.claim ? '/client' : '/hotline')
 }
-async function restart() { reset(); await navigateTo('/hotline') }
 watch(() => route.path, () => { state.value.accountMenu = false; state.value.resetMenu = false })
 useHead(() => ({
   htmlAttrs: { lang: locale.value },
@@ -21,7 +21,8 @@ useHead(() => ({
 </script>
 
 <template>
-  <DemoShell :locale="locale" @set-locale="setLocale" :active="active" :account="account" :menu-open="state.accountMenu" :reset-open="state.resetMenu" @toggle-account="state.accountMenu = !state.accountMenu; state.resetMenu = false" @close-account="state.accountMenu = false" @switch-account="switchAccount" @toggle-reset="state.resetMenu = !state.resetMenu; state.accountMenu = false" @reset="restart">
+  <NuxtPage v-if="isMarketingPage" />
+  <DemoShell v-else :locale="locale" @set-locale="setLocale" :active="active" :account="account" :menu-open="state.accountMenu" @toggle-account="state.accountMenu = !state.accountMenu" @close-account="state.accountMenu = false" @switch-account="switchAccount">
     <div v-if="state.notice" class="toast" role="status">{{ t(state.notice) }}<button class="icon-button" :aria-label="t('Dismiss notification')" @click="state.notice = ''"><UiIcon name="X" :size="14" /></button></div>
     <NuxtPage />
   </DemoShell>

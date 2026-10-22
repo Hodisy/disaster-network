@@ -1,12 +1,21 @@
 <script setup>
-const { t } = useAppI18n()
-const { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase } = useDemoSettings()
+const { t, locale, setLocale } = useAppI18n()
+const { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase, localConfirming, resetLocal } = useDemoSettings()
+const { source } = useHotlineClaim()
+const { access, accessKey, restoreAccess, unlock } = useHotlineAccess()
+onMounted(restoreAccess)
 useHead(() => ({ title: t('Settings — Disaster Network') }))
 </script>
 
 <template>
   <div class="settings-page">
-    <header><span>{{ t('Demo controls') }}</span><h1>{{ t('Settings') }}</h1><p>{{ t('A small maintenance area for preparing the next demonstration.') }}</p></header>
+    <header><span>{{ t('Workspace controls') }}</span><h1>{{ t('Settings') }}</h1><p>{{ t('Configure voice access and manage the evaluation workspace.') }}</p></header>
+    <section class="language-settings" :aria-label="t('Language')">
+      <h2>{{ t('Language') }}</h2>
+      <LanguageToggle :locale="locale" @change="setLocale" />
+    </section>
+    <HotlineSettingsPanel v-model:mode="source" :authorized="access.authorized" :checking="access.checking" v-model:access-key="accessKey" :error="access.error ? hotlineErrorPhrase(access.error) : ''" @unlock="unlock" />
+    <LocalDemoResetPanel :confirming="localConfirming" @request="localConfirming = true" @cancel="localConfirming = false" @confirm="resetLocal" />
     <DemoSettingsPanel :pending="pending" :confirming="confirming" v-model:maintenance-key="maintenanceKey" :error="error" :result="result" @request-reset="requestReset" @cancel-reset="cancelReset" @confirm-reset="resetDatabase" />
     <NuxtLink to="/hotline" class="back-link"><UiIcon name="ArrowLeft" :size="14" />{{ t('Back to the hotline') }}</NuxtLink>
   </div>
@@ -21,4 +30,7 @@ header p { margin-top: 8px; font-size: 13px; color: #80808a; line-height: 1.8; }
 .back-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 22px; font-size: 11px; color: #85858e; padding: 5px 0; }
 .back-link:hover { color: var(--ink); }
 .back-link:focus-visible { outline: 2px solid #74747c; outline-offset: 4px; }
+.settings-page > section + section { margin-top: 18px; }
+.language-settings { display: flex; align-items: center; justify-content: space-between; padding: 20px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.language-settings h2 { font-size: 14px; font-weight: 600; }
 </style>

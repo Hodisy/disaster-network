@@ -129,7 +129,7 @@ Jules is a fictional owner-occupier living with his partner and one child. The h
 
 The hotline creates a report, checks the demonstration contract and records that any CatNat recognition remains unverified. It asks for existing evidence and an inventory without requiring re-entry. The portal receives a synthetic invoice and already-available photographs. Document completeness advances; coverage assessment remains a separate stage. Site access is initially unknown; physical missions remain blocked until a clearly synthetic access update permits them.
 
-The fictional **Allstorm Home Flood Assistance Demo**, version 1, permits consideration of direct flood damage and specified assistance before recognition. Its limits are invented demonstration terms, not real policy coverage:
+The fictional **Allstorm Home Protect**, version 1, permits consideration of direct flood damage and specified assistance before recognition. Its limits are invented demonstration terms, not real policy coverage:
 
 | Benefit | Fictional limit | Jules's initial estimate |
 | --- | --- | --- |

@@ -56,7 +56,7 @@ The public IDs are defined once in [app/config/demo.js](../app/config/demo.js). 
 | Item | Initial data |
 | --- | --- |
 | Customers | Jules, Camille and Sam, all fictional; no surname is invented for Jules |
-| Policies | Three, one per customer; Jules's contract is `ALL-DEMO-001` |
+| Policies | Three, one per customer; Jules's contract is `123456` |
 | Documents | Four synthetic UTF-8 text documents: shared general terms and three specific terms |
 | Search sections | Eleven, with English lexical search indexes and exact source document references |
 | Claims | Three reserved records; Jules's `CAT-2026-001` is `awaiting_report`, and the other two have reported scenarios |
@@ -67,7 +67,7 @@ The small fixture is not the complete 80-household portfolio defined in the [ins
 
 Event date: 20 October 2026. Report/demo date: 22 October 2026, Europe/Paris. Town-scale coordinates are illustrative, not exact households. Jules retains the address already used by the frontend as a scenario setting; it is not evidence of an actual damaged residence or a real resident. Contacts use the reserved `.invalid` domain and no real phone numbers. Product limits follow the fictional Allstorm brief. The sample general terms include exclusions and the fictional EUR 300 contents/building deductible. No source has been fetched, no real insurance PDF imported and no PDF pages fabricated. Text fixtures have nullable page numbers; real PDFs can later use `application/pdf`, extracted text, and actual page references.
 
-The frontend still simulates document collection and stage transitions. This work does not implement real identity verification. The fixture verification word is `demo`; its stored format is `scrypt:<salt>:<digest>`, with lowercase/trimmed answer semantics for the Live verifier. This is public demo material, not a real identity factor. Before a successful check, the Live harness only receives verification results, never the private customer projection or answer hash. Keep the temporary verification result in the active call context; no login or database sessions are needed for this demo.
+The frontend still simulates document collection and stage transitions. This work does not implement real identity verification. The fixture verification word is `olivier`; its stored format is `scrypt:<salt>:<digest>`, with lowercase/trimmed answer semantics for the Live verifier. This is public demo material, not a real identity factor. Before a successful check, the Live harness only receives verification results, never the private customer projection or answer hash. Keep the temporary verification result in the active call context; no login or database sessions are needed for this demo.
 
 ## Commands and reset
 
@@ -94,3 +94,9 @@ The optional Live harness uses the existing schema without migrations. Before ve
 On explicit browser confirmation, the repository transaction updates Jules's existing claim: report, summary, habitability, restricted/unknown access, identified needs, required categories and priority. `claim_events.data` for `hotline_report_saved` contains `operation_id`, `fictional`, stable customer/policy IDs, `confirmation: explicit_browser_review` and `draft`. The draft retains safety, declared household, current accommodation, requested start/nights/constraints, needs and document codes. It does not store verification answers. A voice-channel client message stores the confirmed report narrative; complete call transcripts/audio are not persisted. Repeated operation IDs are idempotent under the maintenance advisory lock; stale drafts are rejected.
 
 This intake never changes contractual terms, assessment, coverage approval, site permission, money, assignments or claim stage. Local previews remain browser-only. The 80-household insurer portfolio still uses frontend synthetic fixtures for the other 79 households and financial/resource assumptions; the small PostgreSQL seed has only three customers. See the [Live guide](openai-live-hotline.md) for all tools, environment names, authorization/retention limits and steps the user can run. No service connection or live behavior has been verified.
+
+## Realistic reference presentation — 22 October 2026
+
+Policy labels are **Allstorm Home Protect**, with six-digit references: Jules **123456**, Camille **123457**, Sam **123458**. Existing UUIDs and claim references are unchanged. The verification question is “What is your security word?” with the public evaluation word **olivier**, still stored only as the scrypt hash and checked on the server. Contacts remain non-deliverable reserved-domain examples. Policy documents remain UTF-8 text, with HP-prefixed clause references and an explicit evaluation-copy notice; they are not PDFs.
+
+A separately authorized Aiven reference refresh updated these labels, challenge hashes, controlled clauses, provider names and unchanged seeded assistant replies. It did not reset the database or change existing claims, user-written messages, attachments, events or assignments. Updated JSON and SQL fixtures match the new reference presentation. Full audio, app and browser validation remains unperformed in this pass.

@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({ claims: Object, providers: Object, assignments: Object, proposed: Object, selected: Object, showPopup: Boolean, stats: Object })
+const props = defineProps({ claims: Object, providers: Object, assignments: Object, proposed: Object, selected: Object, showPopup: Boolean, stats: Object, appearance: { type: String, default: 'workspace' }, openLabel: { type: String, default: 'Open claim' } })
 const emit = defineEmits(['select', 'open', 'provider', 'dismiss-popup'])
 const { t } = useAppI18n()
 const canvas = ref(null)
@@ -7,10 +7,10 @@ const { loading, error, popupPosition, resetView, zoom, retry } = useOperationsM
 </script>
 
 <template>
-  <section class="map-region" :aria-label="t('Synthetic household claims around Berre Lagoon')">
+  <section class="map-region" :aria-label="t('Reported households around Berre Lagoon')">
     <div class="map-surface">
       <div ref="canvas" class="map-canvas" />
-      <div class="map-caption"><span />{{ t('Synthetic locations · No official affected-area boundary') }}<small>{{ t('{count} shown on map', { count: claims.features.length }) }}</small></div>
+      <div class="map-caption"><span />{{ t('Approximate locations · Household privacy') }}<small>{{ t('{count} shown on map', { count: claims.features.length }) }}</small></div>
       <div class="map-controls"><button :aria-label="t('Zoom in')" @click="zoom(1)"><UiIcon name="Plus" /></button><button :aria-label="t('Zoom out')" @click="zoom(-1)"><UiIcon name="Minus" /></button><button :aria-label="t('Reset map view')" @click="resetView"><UiIcon name="LocateFixed" :size="17" /></button></div>
       <div v-if="loading" class="map-message" role="status"><span class="loading-dot" />{{ t('Loading the basemap…') }}</div>
       <div v-if="error" class="map-error" role="status"><UiIcon name="MapPin" :size="22" /><p>{{ t(error) }}</p><UiButton class="small" @click="retry">{{ t('Retry map') }}</UiButton></div>
@@ -19,7 +19,7 @@ const { loading, error, popupPosition, resetView, zoom, retry } = useOperationsM
         <span>{{ selected.municipality }}</span><span>{{ selected.id }}</span>
         <span class="priority-label" :class="selected.priority"><i />{{ t(selected.priority === 'P1' ? 'P1 Urgent' : selected.priority === 'P2' ? 'P2 Priority' : 'P3 Standard') }}</span>
         <p><UiIcon name="House" :size="14" />{{ t(selected.situation) }}</p>
-        <UiButton class="dark small" @click="$emit('open', selected.id)">{{ t('Open claim') }}<UiIcon name="ChevronRight" :size="14" /></UiButton>
+        <UiButton class="dark small" @click="$emit('open', selected.id)">{{ t(openLabel) }}<UiIcon name="ChevronRight" :size="14" /></UiButton>
       </div>
     </div>
     <footer class="map-legend">

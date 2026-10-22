@@ -5,20 +5,20 @@ defineEmits(['request-reset', 'cancel-reset', 'confirm-reset', 'update:maintenan
 </script>
 
 <template>
-  <section class="settings-panel" :aria-label="t('Demo database')" :aria-busy="pending">
-    <div class="panel-heading"><span class="panel-icon"><UiIcon name="RotateCcw" :size="19" /></span><div><h2>{{ t('Demo database') }}</h2><p>{{ t('Restore the small fictional dataset, including Jules and his policy.') }}</p></div></div>
-    <p class="scope-note">{{ t('This removes claim progress, messages and uploaded files from the demo database. Other database schemas are not affected.') }}</p>
+  <section class="settings-panel" :aria-label="t('Reference data')" :aria-busy="pending">
+    <div class="panel-heading"><span class="panel-icon"><UiIcon name="RotateCcw" :size="19" /></span><div><h2>{{ t('Reference data') }}</h2><p>{{ t('Restore the initial evaluation records, including Jules and his policy.') }}</p></div></div>
+    <p class="scope-note">{{ t('This clears claim progress, messages and files in the evaluation database. Other database schemas are not affected.') }}</p>
     <div v-if="result" class="success-message" role="status"><UiIcon name="CircleCheck" :size="17" /><p>{{ t('Database restored: {customers} customers, {policies} policies and {claims} claim records.', result) }}</p></div>
     <p v-if="error" class="error-message" role="alert">{{ t(error) }}</p>
     <form v-if="confirming" class="confirmation" @submit.prevent="$emit('confirm-reset')">
-      <h3>{{ t('Restore the demo database?') }}</h3>
-      <p>{{ t('All current data in the demo schema will be replaced by the initial dataset. This cannot restore your current progress.') }}</p>
+      <h3>{{ t('Restore the initial records?') }}</h3>
+      <p>{{ t('All current evaluation records will be replaced by the initial data. Your current progress cannot be recovered through this action.') }}</p>
       <label for="maintenance-key">{{ t('Maintenance key') }}</label>
       <input id="maintenance-key" type="password" :value="maintenanceKey" :disabled="pending" maxlength="256" autocomplete="off" spellcheck="false" required :placeholder="t('Enter the server maintenance key')" @input="$emit('update:maintenanceKey', $event.target.value)" />
       <small>{{ t('The key is used only for this request and is not saved in your browser storage.') }}</small>
       <div class="actions"><UiButton :disabled="pending" @click="$emit('cancel-reset')">{{ t('Cancel') }}</UiButton><UiButton type="submit" class="dark" :disabled="pending || !maintenanceKey.trim()"><UiIcon name="RotateCcw" :size="15" />{{ t(pending ? 'Restoring…' : 'Confirm database reset') }}</UiButton></div>
     </form>
-    <div v-else class="panel-footer"><span>{{ t('Database reset is separate from the local demo reset.') }}</span><UiButton class="small" @click="$emit('request-reset')"><UiIcon name="RotateCcw" :size="14" />{{ t('Restore demo data') }}</UiButton></div>
+    <div v-else class="panel-footer"><span>{{ t('Database reset is separate from clearing this browser workspace.') }}</span><UiButton class="small" @click="$emit('request-reset')"><UiIcon name="RotateCcw" :size="14" />{{ t('Restore reference data') }}</UiButton></div>
   </section>
 </template>
 

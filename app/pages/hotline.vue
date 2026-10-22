@@ -1,22 +1,20 @@
 <script setup>
-const { t, formatDate } = useAppI18n()
-const { state, speak, stopCall, openClaim, eventDate } = useDemo()
+const { t } = useAppI18n()
+const { state, speak, stopCall, openClaim } = useDemo()
 const { source, refreshLiveClaim, claimError } = useHotlineClaim()
-const { live, active, start, end, interruptSpeech, confirm, playAudio } = useLiveHotline()
-const accessKey = ref('')
+const { live, active, access, captionEntries, start, end, interruptSpeech, confirm, playAudio } = useLiveHotline()
 const call = computed(() => source.value === 'live' ? { ...live, complete: false, turn: 0 } : state.value.call)
 const orbState = computed(() => ({ listening: 'listening', responding: 'solving', connecting: 'weaving', closing: 'weaving', ready: call.value.complete ? 'searching' : 'weaving', paused: 'searching' })[call.value.phase] || 'searching')
 const label = computed(() => {
-  if (source.value === 'live') return ({ connecting: 'Connecting to Live voice…', listening: 'Listening…', responding: 'Assistant transcript arriving…', closing: 'Ending the call…', ended: 'Call ended', error: 'Live voice unavailable' })[live.phase] || 'Click to start Live voice'
+  if (source.value === 'live') return ({ connecting: 'Connecting your call…', listening: 'Listening…', responding: 'Allstorm is speaking…', closing: 'Ending the call…', ended: 'Call ended', error: 'Call unavailable' })[live.phase] || 'Click to start your call'
   if (call.value.complete) return 'Your report is ready'
   return ({ listening: 'Listening…', responding: 'One moment, preparing your reply…', paused: 'Call interrupted · Click to resume', ready: 'Click to continue' })[call.value.phase] || 'Click to get started'
 })
 async function useOrb() {
   if (source.value === 'mock') return speak()
   if (active.value) return interruptSpeech()
-  try { await start(accessKey.value) } finally { accessKey.value = '' }
+  await start()
 }
-function changeMode(value) { if (active.value) return; stopCall(); source.value = value; accessKey.value = ''; claimError.value = '' }
 async function createClaim() { await openClaim(); if (state.value.claim) await navigateTo('/client') }
 onMounted(() => { if (source.value === 'live') void refreshLiveClaim({ quiet: true }) })
 onBeforeUnmount(stopCall)
@@ -26,37 +24,21 @@ useHead(() => ({ title: t('Hotline — Disaster Network') }))
 <template>
   <div class="hotline-page">
     <div class="hotline-heading"><h1>{{ t('We are listening.') }}</h1><p>{{ t('Tell us what happened. We will help with the next steps.') }}</p></div>
-    <div class="mode-controls" :aria-label="t('Conversation mode')">
-      <button :aria-pressed="source === 'live'" :disabled="active" @click="changeMode('live')">{{ t('Live AI voice') }}</button>
-      <button :aria-pressed="source === 'mock'" :disabled="active" @click="changeMode('mock')">{{ t('Scripted demo · Microphone off') }}</button>
-    </div>
-    <div v-if="source === 'live'" class="live-controls">
-      <p>{{ t('Your voice is sent to OpenAI during the call. The assistant is AI; Allstorm and all insurance outcomes are fictional.') }}</p>
-      <label v-if="!active && !live.authorized">{{ t('Demo access key') }}<input v-model="accessKey" type="password" autocomplete="off" maxlength="256" :placeholder="t('Enter the private demo access key')" @keydown.enter.prevent="useOrb" /></label>
-      <span v-if="active">{{ t(live.verified ? 'Demo customer verified for this call' : 'Customer verification pending') }}</span>
-      <UiButton v-if="active" class="small" :disabled="live.phase === 'closing'" @click="end()">{{ t('End call') }}</UiButton>
-      <UiButton v-if="live.audioBlocked" class="small" @click="playAudio">{{ t('Play assistant audio') }}</UiButton>
-    </div>
-    <VoiceSession :phase="call.phase" :complete="call.complete" :turn="call.turn" :transcript="call.transcript" :response="call.response" :orb-state="orbState" :label="label" :live="source === 'live'" :microphone-state="live.microphoneState" :busy="source === 'live' && ['connecting', 'closing'].includes(live.phase)" @speak="useOrb" />
+    <VoiceSession :phase="call.phase" :complete="call.complete" :turn="call.turn" :transcript="call.transcript" :response="call.response" :entries="captionEntries" :transcript-truncated="live.transcriptTruncated" :orb-state="orbState" :label="label" :live="source === 'live'" :microphone-state="live.microphoneState" :busy="source === 'live' && ['connecting', 'closing'].includes(live.phase)" @speak="useOrb" @end="end()" />
+    <NuxtLink v-if="source === 'live' && !active && !access.authorized && !access.checking" to="/settings" class="access-link">{{ t('Configure voice access in Settings') }}</NuxtLink>
+    <UiButton v-if="source === 'live' && live.audioBlocked" class="audio-recovery small" @click="playAudio">{{ t('Play assistant audio') }}</UiButton>
     <div v-if="source === 'live' && live.error" class="inline-error" role="alert">{{ t(live.error) }}</div>
     <div v-if="source === 'live' && claimError" class="inline-error" role="alert">{{ t(hotlineErrorPhrase(claimError)) }}</div>
     <LiveReportReview v-if="source === 'live' && live.draft" :draft="live.draft" :busy="live.confirming" @confirm="confirm" />
     <p v-if="source === 'live' && live.saved" class="live-saved">{{ t('Report saved in PostgreSQL. Requested documents are available in My claim.') }}</p>
     <div v-if="source === 'mock' && state.error" class="inline-error" role="alert">{{ t(state.error) }}</div>
     <div v-if="(source === 'mock' && call.complete) || state.claim" class="claim-ready"><span><UiIcon name="CircleCheck" :size="17" />{{ t(state.claim ? 'Your claim is open.' : 'Everything is ready to open your claim.') }}</span><UiButton v-if="state.claim" to="/client" class="dark">{{ t('View my claim') }}<UiIcon name="ArrowRight" :size="15" /></UiButton><UiButton v-else class="dark" :disabled="!!state.busy" @click="createClaim">{{ t(state.busy === 'open' ? 'Opening…' : 'Open my claim') }}<UiIcon name="ArrowRight" :size="15" /></UiButton></div>
-    <footer class="quiet-footer"><UiIcon name="ShieldCheck" :size="14" /><span>{{ t('Allstorm Insurance is fictional. Flood scenario in Istres, {date}.', { date: formatDate(eventDate) }) }}</span></footer>
   </div>
 </template>
 
 <style scoped>
-.mode-controls { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
-.mode-controls button { padding: 9px 14px; border: 1px solid #e3e3e7; border-radius: 20px; font-size: 11px; color: #777781; }
-.mode-controls button[aria-pressed="true"] { background: #202023; color: white; border-color: #202023; }
-.mode-controls button:disabled { opacity: .6; }
-.live-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin: 16px auto 0; max-width: 720px; font-size: 11px; color: #85858e; }
-.live-controls p { flex-basis: 100%; text-align: center; line-height: 1.6; }
-.live-controls label { display: flex; align-items: center; gap: 10px; }
-.live-controls input { border: 1px solid #dedee3; border-radius: 8px; padding: 9px 12px; width: 270px; font-size: 11px; }
+.access-link { display: block; width: fit-content; margin: 18px auto; font-size: 12px; color: #777780; text-decoration: underline; }
+.audio-recovery { display: flex; margin: 18px auto; }
 .live-saved { margin: 20px 0; color: #46755a; font-size: 12px; line-height: 1.6; }
 .inline-error { margin: 16px 0; padding: 12px 15px; color: #a13d3d; background: #fff5f4; border: 1px solid #f1d8d5; border-radius: 8px; font-size: 12px; line-height: 1.6; }
 .hotline-page { max-width: 1160px; margin: 0 auto; padding: 44px 52px 24px; }
@@ -66,5 +48,4 @@ useHead(() => ({ title: t('Hotline — Disaster Network') }))
 .claim-ready { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 15px; padding: 17px 0; border-top: 1px solid var(--border); }
 .claim-ready > span { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #686872; }
 .claim-ready > span svg { color: #39ac6b; }
-.quiet-footer { display: flex; align-items: center; gap: 7px; margin-top: 27px; color: #a0a0aa; font-size: 10px; line-height: 1.6; }
 </style>

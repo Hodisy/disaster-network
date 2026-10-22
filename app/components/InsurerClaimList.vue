@@ -6,7 +6,7 @@ defineEmits(['select', 'page', 'clear'])
 
 <template>
   <section class="claim-list">
-    <div class="list-heading"><h2>{{ t(mode === 'priority' ? 'Needs attention' : 'All claims') }}<span>{{ total }}</span></h2><p>{{ t(mode === 'priority' ? 'Unmet urgent needs, highest waiting time first.' : 'Synthetic households, one principal claim each.') }}</p></div>
+    <div class="list-heading"><h2>{{ t(mode === 'priority' ? 'Needs attention' : 'All claims') }}<span>{{ total }}</span></h2><p>{{ t(mode === 'priority' ? 'Unmet urgent needs, highest waiting time first.' : 'One household, one linked home claim.') }}</p></div>
     <div v-if="!claims.length" class="empty-list"><UiIcon name="Search" :size="24" /><p>{{ t('No claims match these filters.') }}</p><button @click="$emit('clear')">{{ t('Clear filters') }}</button></div>
     <div v-else class="list-rows">
       <button v-for="claim in claims" :key="claim.id" class="claim-row" :class="{ selected: selectedId === claim.id, urgent: claim.priority === 'P1' }" @click="$emit('select', claim.id)">

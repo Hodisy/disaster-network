@@ -1,4 +1,4 @@
-import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE } from '../config/demo.js'
+import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, DEMO_CONTRACT_NUMBER, DEMO_PRODUCT_NAME } from '../config/demo.js'
 
 // Canonical, fictional scenario shared by the client and insurer composables.
 export const claimStages = ['Collecting documents', 'Documents complete', 'Coverage proposal', 'Assistance arranged', 'Claim closed']
@@ -16,12 +16,13 @@ export const demoBenefits = [
 export function createReferenceClaim() {
   return {
     id: DEMO_CLAIM_REFERENCE, databaseId: DEMO_CLAIM_ID, customerId: DEMO_CUSTOMER_ID, policyId: DEMO_POLICY_ID,
+    contractNumber: DEMO_CONTRACT_NUMBER, productName: DEMO_PRODUCT_NAME,
     name: 'Jules', nameParameters: {}, initials: 'J', householdSize: 3,
-    address: '12 rue des Oliviers, 13800 Istres', addressNote: 'Demo address, not a verified damaged property.',
+    address: '12 rue des Oliviers, 13800 Istres', addressNote: 'Declared main residence.',
     event: 'Flooding', eventDate: '2026-10-20', date: '2026-10-20', reportedAt: '2026-10-22', stage: 0,
     municipality: 'Istres', cluster: 'Other Istres locations', coordinates: [4.9784, 43.5148],
     group: 'A', priority: 'P1', access: 'Unknown', coverage: 'Not reviewed', catNat: 'Not verified',
-    opened: true, waitingHours: 6, occupancy: 'Owner-occupier',
+    opened: true, waitingHours: 2, occupancy: 'Owner-occupier',
     situation: 'Home uninhabitable', accommodationNeeded: true, accommodationPlaced: false,
     currentAccommodation: 'Staying with relatives; a lasting solution is needed.',
     priorityReason: 'The household cannot return home and has no lasting accommodation solution.',

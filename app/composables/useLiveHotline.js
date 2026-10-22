@@ -2,14 +2,14 @@ import { hotlineRequest } from './useHotlineClaim.js'
 
 const errorPhrases = {
   HOTLINE_DISABLED: 'Live voice is disabled. Enable it in the private server configuration.',
-  HOTLINE_NOT_CONFIGURED: 'Set a private demo access key and the allowed application origin on the server.',
-  HOTLINE_ACCESS_DENIED: 'Demo access was denied. Check the access key and configured application origin.',
-  HOTLINE_RATE_LIMITED: 'Too many demo requests. Wait ten minutes before trying again.',
+  HOTLINE_NOT_CONFIGURED: 'Set a private workspace access key and the allowed application origin on the server.',
+  HOTLINE_ACCESS_DENIED: 'Voice access is locked. Open Settings to unlock this browser, or check the configured application origin.',
+  HOTLINE_RATE_LIMITED: 'Too many requests. Wait ten minutes before trying again.',
   HOTLINE_ALREADY_ACTIVE: 'A voice session is already active. End it before starting another.',
   DATABASE_NOT_CONFIGURED: 'PostgreSQL is not configured. Set the database URL and verified TLS settings.',
   DATABASE_UNAVAILABLE: 'PostgreSQL is unavailable. Nothing was saved.',
-  DEMO_SCHEMA_MISSING: 'The demo database schema is missing or has an unexpected version. Prepare the existing seed manually.',
-  DEMO_RECORD_MISSING: 'The reserved Jules customer, policy, claim or contractual sections are missing.',
+  DEMO_SCHEMA_MISSING: 'The evaluation database schema is missing or has an unexpected version. Prepare the reference data before starting.',
+  DEMO_RECORD_MISSING: 'Jules’s linked customer, policy, claim or policy clauses are missing.',
   OPENAI_NOT_CONFIGURED: 'Set OPENAI_API_KEY on the server before starting Live voice.',
   OPENAI_LIVE_ACCESS_UNAVAILABLE: 'GPT-Live access is unavailable for this key or model. Check project access; Realtime was not substituted.',
   OPENAI_BACKEND_UNAVAILABLE: 'The delegated OpenAI model or tool configuration is unavailable. End the call and check server configuration.',
@@ -32,13 +32,36 @@ export function useLiveHotline() {
   const { locale } = useAppI18n()
   const { state: demoState } = useDemo()
   const { source, refreshLiveClaim } = useHotlineClaim()
-  const live = reactive({ phase: 'idle', transcript: '', response: '', error: '', authorized: false,
-    verified: false, draft: null, traces: [], saved: false, audioBlocked: false, microphoneState: 'off', finalized: false, confirming: false, fragments: [] })
+  const { access, restoreAccess } = useHotlineAccess()
+  const live = reactive({ phase: 'idle', transcript: '', response: '', error: '',
+    verified: false, draft: null, traces: [], saved: false, audioBlocked: false, microphoneState: 'off', finalized: false, confirming: false, fragments: [], transcriptTruncated: false })
+  const captionEntries = computed(() => {
+    // Each speaker grows independently during overlap. Timeline gaps are a display
+    // heuristic, not provider-confirmed turns. Preserve every retained delta verbatim.
+    const entries = []
+    for (const speaker of ['user', 'assistant']) {
+      const fragments = live.fragments.map((fragment, index) => ({ ...fragment, index }))
+        .filter(fragment => fragment.speaker === speaker)
+        .sort((a, b) => (a.startMs ?? a.index) - (b.startMs ?? b.index) || a.index - b.index)
+      let entry
+      for (const fragment of fragments) {
+        const gap = fragment.startMs != null && entry?.endMs != null ? fragment.startMs - entry.endMs : null
+        if (!entry || gap > 1400) {
+          entry = { id: `${speaker}-${fragment.index}`, speaker, text: '', startMs: fragment.startMs, endMs: fragment.endMs, index: fragment.index }
+          entries.push(entry)
+        }
+        entry.text += fragment.delta
+        if (fragment.endMs != null) entry.endMs = Math.max(entry.endMs ?? 0, fragment.endMs)
+      }
+    }
+    return entries.sort((a, b) => (a.startMs ?? a.index) - (b.startMs ?? b.index) || a.index - b.index)
+  })
   const active = computed(() => ['connecting', 'listening', 'responding', 'closing'].includes(live.phase))
   let peer, channel, microphone, audio, pollTimer, closeTimer, startupTimer, disconnectTimer, transcriptTimer
   let generation = 0
   let claimLoaded = false
   let aborter
+  let greetingInstruction = '', greeted = false
   const seen = new Set()
   function release() {
     clearTimeout(pollTimer); clearTimeout(closeTimer); clearTimeout(startupTimer); clearTimeout(disconnectTimer); clearTimeout(transcriptTimer)
@@ -51,7 +74,7 @@ export function useLiveHotline() {
   function fail(error) {
     const code = error?.code || error?.message || 'HOTLINE_FAILED'
     live.error = hotlineErrorPhrase(code)
-    if (code === 'HOTLINE_ACCESS_DENIED') live.authorized = false
+    if (code === 'HOTLINE_ACCESS_DENIED') access.value.authorized = false
     live.phase = 'error'
     ++generation; aborter?.abort()
     release()
@@ -80,14 +103,22 @@ export function useLiveHotline() {
       seen.add(event.event_id)
       if (seen.size > 2000) seen.delete(seen.values().next().value)
     }
-    if (event.type === 'session.started') { clearTimeout(startupTimer); if (live.phase !== 'closing') live.phase = 'listening' }
+    if (event.type === 'session.started') {
+      clearTimeout(startupTimer)
+      if (live.phase !== 'closing') live.phase = 'listening'
+      if (!greeted && greetingInstruction && live.phase !== 'closing' && channel?.readyState === 'open') {
+        greeted = true
+        channel.send(JSON.stringify({ type: 'session.commentary.append', event_id: `greeting_${crypto.randomUUID()}`, delegation_id: null, content: greetingInstruction }))
+      }
+    }
     if (['session.input_transcript.delta', 'session.output_transcript.delta'].includes(event.type) && typeof event.delta === 'string') {
       // Exact fragments, including whitespace and repetition. UI groups them by speaker only.
-      live.fragments.push({ speaker: event.type === 'session.input_transcript.delta' ? 'user' : 'assistant', delta: event.delta, startMs: event.start_ms, endMs: event.end_ms })
-      if (live.fragments.length > 1000) live.fragments.shift()
+      live.fragments.push({ speaker: event.type === 'session.input_transcript.delta' ? 'user' : 'assistant', delta: event.delta,
+        startMs: Number.isFinite(event.start_ms) ? event.start_ms : null, endMs: Number.isFinite(event.end_ms) ? event.end_ms : null })
+      if (live.fragments.length > 10000) { live.fragments.shift(); live.transcriptTruncated = true }
       const input = event.type === 'session.input_transcript.delta'
       const key = input ? 'transcript' : 'response'
-      live[key] = (live[key] + event.delta).slice(-16000)
+      live[key] = live.fragments.filter(fragment => fragment.speaker === (input ? 'user' : 'assistant')).map(fragment => fragment.delta).join('')
       if (live.phase !== 'closing') live.phase = input ? 'listening' : 'responding'
       clearTimeout(transcriptTimer)
       transcriptTimer = setTimeout(() => { if (epoch === generation && live.phase === 'responding') live.phase = 'listening' }, 1800)
@@ -97,16 +128,18 @@ export function useLiveHotline() {
     }
     if (event.type === 'error') fail({ code: event.error?.code === 'responses_validation_failed' ? 'OPENAI_BACKEND_UNAVAILABLE' : 'OPENAI_PROTOCOL_ERROR' })
   }
-  async function start(token) {
+  async function start() {
     if (active.value || source.value !== 'live') return
     const epoch = ++generation
-    Object.assign(live, { phase: 'connecting', transcript: '', response: '', error: '', verified: false, draft: null, saved: false, finalized: false, traces: [], audioBlocked: false, fragments: [] })
+    Object.assign(live, { phase: 'connecting', transcript: '', response: '', error: '', verified: false, draft: null, saved: false, finalized: false, traces: [], audioBlocked: false, fragments: [], transcriptTruncated: false })
     seen.clear(); claimLoaded = false
+    greetingInstruction = ''; greeted = false
     aborter = new AbortController()
     try {
       if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) throw { code: 'WEBRTC_UNAVAILABLE' }
-      if (!live.authorized || token) { await hotlineRequest('authorize', { token }, { signal: aborter.signal }); live.authorized = true }
+      await restoreAccess()
       if (epoch !== generation) return
+      if (!access.value.authorized) throw { code: 'HOTLINE_ACCESS_DENIED' }
       // Called only by the explicit orb/start action. Never on mount or mode/language change.
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
       if (epoch !== generation) { stream.getTracks().forEach(track => track.stop()); return }
@@ -142,6 +175,7 @@ export function useLiveHotline() {
       })
       if (epoch !== generation) return
       const result = await hotlineRequest('session', { sdp: connection.localDescription.sdp, locale: locale.value })
+      greetingInstruction = result.greeting || ''
       if (epoch !== generation) { void hotlineRequest('close', { sessionId: result.session.id }, { keepalive: true }).catch(() => {}); return }
       // Creation starts Live. Never send session.start or Realtime response commands.
       startupTimer = setTimeout(() => { if (epoch === generation && live.phase === 'connecting') fail({ code: 'OPENAI_CONNECTION_FAILED' }) }, 20000)
@@ -192,8 +226,8 @@ export function useLiveHotline() {
   const beforeUnload = () => { void end({ immediate: true }) }
   onMounted(() => {
     window.addEventListener('pagehide', beforeUnload)
-    void hotlineRequest('status').then(() => { if (generation === 0) live.authorized = true }).catch(() => {})
+    void restoreAccess()
   })
   onBeforeUnmount(() => { window.removeEventListener('pagehide', beforeUnload); void end({ immediate: true }) })
-  return { live, active, start, end, interruptSpeech, confirm, playAudio }
+  return { live, active, access, captionEntries, start, end, interruptSpeech, confirm, playAudio }
 }

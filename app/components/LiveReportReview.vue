@@ -10,7 +10,7 @@ const documents = { photos: 'Damage photos', address: 'Proof of address', invent
     <h2>{{ t('Review your report') }}</h2><p>{{ t('Confirm only if this report matches what you told the assistant. Ask for corrections before saving.') }}</p>
     <blockquote>{{ draft.description }}</blockquote>
     <dl>
-      <div><dt>{{ t('Household') }}</dt><dd>{{ t('{count} people', { count: draft.householdSize }) }}</dd></div>
+      <div><dt>{{ t('Household') }}</dt><dd>{{ t(draft.householdSize === 1 ? '{count} person' : '{count} people', { count: draft.householdSize }) }}</dd></div>
       <div><dt>{{ t('Household safety') }}</dt><dd>{{ t(({ yes: 'Safe', no: 'Not safe', unknown: 'Unknown' })[draft.safe]) }}</dd></div>
       <div><dt>{{ t('Home') }}</dt><dd>{{ t(({ habitable: 'Home habitable', uninhabitable: 'Home uninhabitable', unknown: 'Unknown' })[draft.habitability]) }}</dd></div>
       <div><dt>{{ t('Site access') }}</dt><dd>{{ t(draft.access === 'restricted' ? 'Restricted' : 'Unknown') }}</dd></div>

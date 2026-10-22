@@ -50,7 +50,7 @@ For a simple coherent seed, place group B's ten files at Les Heures Claires; pla
 
 # Fictional Allstorm coverage
 
-Product label: **Allstorm Home Flood Assistance Demo**. Demonstration version: **1**, effective **1 January to 31 December 2026**. The named insured is an owner-occupier of a declared main residence. All 80 home files use this demo product; their observed facts and review statuses vary.
+Product label: **Allstorm Home Protect**. Demonstration version: **1**, effective **1 January to 31 December 2026**. The named insured is an owner-occupier of a declared main residence. All 80 home files use this demo product; their observed facts and review statuses vary.
 
 For this fictional product, direct flood damage and the assistance benefits below can be considered without waiting for a CatNat recognition order. This is an invented contractual route, not a statement of French statutory entitlement or any real insurer's policy. The separate CatNat status remains **Not verified** until matching public recognition evidence is established.
 
@@ -145,3 +145,7 @@ Before delivery, reconcile the records and copy: 80 households; 170 people; situ
 `app/composables/useClaimScenario.js` owns Jules’s canonical seven-line budget and claim stages. `useInsurerWorkspace.js` generates the fixed 80-household / 170-person portfolio, merges the existing client record, derives all totals, and contains provider/mission mocks and operational actions. `useOperationsMap.js` receives local GeoJSON and renders it with MapLibre GL JS / OpenFreeMap Positron; public basemap downloads do not supply incident data. `app/pages/insurer.vue` binds the presentational components and generates the local report. All new interface phrases use the existing flat EN/FR dictionaries, with English default.
 
 The map keeps its large footprint while the right panel switches Priority queue / All claims / claim detail. Mobilization adds provider capacities and assignments. Provider-outage replanning shows proposed replacements and their assumed timing/cost differences before a simulated apply. Unknown or restricted access remains distinct from a coverage decision; blocked missions cannot be reassigned into inaccessible properties. See the README for current operational controls and limitations.
+
+## Presentation realism
+
+Operational screens use invented first names, varied household situations, coherent report/contact times and severity-dependent estimates. Do not repeat “demo”, “fictional” or “synthetic” in every conversation, status or benefit label. Retain provenance in Settings, source/data metadata, the exported report and one discreet workspace notice. Jules has **Allstorm Home Protect**, policy **123456**, with the existing claim **CAT-2026-001**. No surname is added. The three-record database fixture aligns Camille (123457, one person, Entressen) and Sam (123458, two people, Les Heures Claires) with their portfolio records; the other 77 portfolio records remain frontend-only. Household totals, groups, access constraints, contractual limits and money semantics remain unchanged. Historical design images retain their original text.

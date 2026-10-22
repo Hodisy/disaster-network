@@ -1,3 +1,4 @@
+import { DEMO_CONTRACT_NUMBER, DEMO_PRODUCT_NAME } from '../config/demo.js'
 import { claimStages, createReferenceClaim, demoBenefits } from './useClaimScenario.js'
 
 const clusters = [
@@ -11,49 +12,89 @@ const clusters = [
 const groupLabels = { A: 'Home uninhabitable', B: 'Evacuated or inaccessible', C: 'Damaged but habitable', D: 'Limited or unconfirmed' }
 const needLabels = ['Temporary accommodation', 'Electrical safety', 'Cleaning and drying', 'Moving and storage', 'Damage assessment']
 
+const policyholderNames = ['Camille', 'Sam', 'Alice', 'Hugo', 'Nora', 'Louis', 'Lina', 'Gabriel', 'Inès', 'Arthur', 'Sarah', 'Adam', 'Emma', 'Raphaël', 'Chloé', 'Noah', 'Jade', 'Paul', 'Louise', 'Nathan', 'Manon', 'Lucas', 'Élise', 'Tom', 'Léa', 'Victor', 'Anna', 'Sacha', 'Jeanne', 'Robin', 'Clara', 'Baptiste', 'Mila', 'Mathis', 'Agathe', 'Antoine', 'Lucie', 'Maxime', 'Rose', 'Valentin', 'Zoé', 'Alexandre', 'Eva', 'Simon', 'Iris', 'Théo', 'Margaux', 'Nicolas', 'Salomé', 'Thomas', 'Amina', 'Romain', 'Yasmine', 'Julien', 'Sofia', 'Benoît', 'Maya', 'David', 'Nina', 'Pierre', 'Émilie', 'Adrien', 'Anaïs', 'Karim', 'Marion', 'Olivier', 'Céline', 'Mehdi', 'Julie', 'Laurent', 'Amélie', 'Marc', 'Sophie', 'Florian', 'Élodie', 'Guillaume', 'Aurore', 'Sébastien', 'Mathilde']
+const situationNotes = {
+  A: [
+    'Water entered the ground-floor living areas. Kitchen units and several appliances are damaged. The household is staying with relatives while accommodation and access are reviewed.',
+    'Floodwater affected the ground floor, including flooring and furniture. The household cannot stay in the property. Electrical inspection and drying are needed once access is confirmed.',
+    'The living room and bedrooms on the ground floor were affected. Mattresses and low-level furniture are damaged. A temporary accommodation request is being assessed.',
+    'Water remains in part of the property. The household has left the home and is seeking a stable place to stay. Damage assessment and safe access are still pending.'
+  ],
+  B: [
+    'The household left the area after an evacuation instruction. The home remains inaccessible and internal damage has not been established.',
+    'Access to the residence is restricted. The household is staying away from the property; assistance needs and the next contact date are being reviewed.',
+    'The household cannot reach the residence. No inspection has taken place, and no building or contents loss is assumed at this stage.'
+  ],
+  C: [
+    'Water entered the garage and damaged stored belongings. The living areas remain usable. An inventory and photographs are being collected.',
+    'Floodwater affected a ground-floor utility room. The household remains at home. Cleaning and drying requirements are being assessed.',
+    'Water damaged flooring and furniture in one room. The remaining living areas are usable. Photos and a repair assessment are requested.',
+    'A small amount of water entered the entrance hall. The household remains in the property. Skirting boards and flooring require assessment.'
+  ],
+  D: [
+    'Water was reported near the property, with no internal damage confirmed. A follow-up call is needed to clarify the situation.',
+    'The household reported minor water ingress at an outbuilding. The extent of damage and any assistance needs remain to be confirmed.',
+    'The initial contact did not establish property damage. The household has been asked to share any available photographs without entering a restricted area.'
+  ]
+}
+
 function createPortfolio() {
   const reference = { ...createReferenceClaim(), opened: false, chronology: [] }
   const places = clusters.flatMap(cluster => Array.from({ length: cluster.count }, () => cluster))
   places.splice(places.findIndex(place => place.label === reference.cluster), 1)
+  // Keep the two additional PostgreSQL fixture households in the same portfolio records.
+  const evacuated = places.splice(places.findIndex(place => place.label === 'Les Heures Claires'), 1)[0]
+  places.splice(1, 0, evacuated)
   const sizes = [...Array(30).fill(1), ...Array(25).fill(2), ...Array(9).fill(3), ...Array(15).fill(4)]
-  let otherIndex = 1
+  sizes[1] = 2
+  sizes[30] = 1
+  let otherIndex = 0
   return [reference, ...places.map((place, index) => {
     const ordinal = index + 2
     const isEvacuated = place.label === 'Les Heures Claires'
-    const order = isEvacuated ? 0 : otherIndex++
-    const group = isEvacuated ? 'B' : order <= 14 ? 'A' : order <= 49 ? 'C' : 'D'
-    const accommodationNeeded = group === 'A' ? order <= 8 : group === 'B' ? index % 3 === 0 : false
+    const order = isEvacuated ? 0 : ++otherIndex
+    const group = isEvacuated ? 'B' : index === 0 ? 'C' : order <= 15 ? 'A' : order <= 49 ? 'C' : 'D'
+    const accommodationNeeded = group === 'A' ? order <= 9 : group === 'B' ? index % 3 === 0 : false
     const closed = group === 'D' && index % 4 === 0
-    const unknownDamage = group === 'B' || (group === 'D' && !closed)
-    const stage = closed ? 4 : group === 'C' ? index % 4 : index % 2
+    const stage = closed ? 4 : group === 'C' ? index % 3 : 0
     const needs = group === 'A' ? ['Temporary accommodation', 'Electrical safety', 'Cleaning and drying', 'Damage assessment']
       : group === 'B' ? ['Temporary accommodation', 'Damage assessment']
         : group === 'C' ? ['Cleaning and drying', 'Damage assessment'] : closed ? [] : ['Damage assessment']
+    if ((group === 'A' || group === 'C') && index % 3 === 1) needs.push('Moving and storage')
+    if (group === 'C' && index % 4 === 2) needs.push('Electrical safety')
     const moneyLines = demoBenefits.map((benefit, benefitIndex) => {
       let amount = null
       if (closed) amount = 0
-      else if (benefit.id === 'accommodation') amount = accommodationNeeded ? 600 + (index % 4) * 100 : 0
+      else if (benefit.id === 'accommodation') amount = accommodationNeeded ? [750, 900, 625, 1000, 525][index % 5] : 0
       else if (group === 'A' || group === 'C') {
-        amount = Math.min(benefit.limit, Math.round(benefit.amount * (0.35 + ((index * 7 + benefitIndex * 3) % 15) / 10) / 10) * 10)
+        const relevant = benefit.id === 'electrical' ? needs.includes('Electrical safety') : benefit.id === 'storage' ? needs.includes('Moving and storage') : true
+        const severity = (group === 'A' ? 0.65 : 0.12) + ((index * 7 + benefitIndex * 3) % 13) / (group === 'A' ? 10 : 24)
+        amount = relevant ? Math.min(benefit.limit, Math.round(benefit.amount * severity / 25) * 25) : 0
       }
       return { ...benefit, amount, approved: 0, paid: 0, review: 'Not reviewed' }
     })
+    const hour = String(11 - index % 10).padStart(2, '0')
+    const minute = String(index * 17 % 60).padStart(2, '0')
+    const reportedAt = index < 2 ? '2026-10-22T08:15:00+02:00' : `2026-10-22T${hour}:${minute}:00+02:00`
+    const name = policyholderNames[index]
     return {
-      id: `CAT-2026-${String(ordinal).padStart(3, '0')}`, name: 'Household {number}', nameParameters: { number: String(ordinal).padStart(3, '0') }, initials: String(ordinal).padStart(2, '0'),
+      id: `CAT-2026-${String(ordinal).padStart(3, '0')}`, name, nameParameters: {}, initials: name.slice(0, 1),
+      contractNumber: String(Number(DEMO_CONTRACT_NUMBER) + ordinal - 1), productName: DEMO_PRODUCT_NAME,
       householdSize: sizes[index], municipality: place.municipality, cluster: place.label,
-      // Approximate, invented locations around the named cluster, never real property reports.
+      // Approximate scenario locations; no actual resident or damaged property is identified.
       coordinates: [place.coordinates[0] + (((index * 7) % 13) - 6) * 0.00065, place.coordinates[1] + (((index * 11) % 13) - 6) * 0.0005],
-      address: place.label, addressNote: 'Synthetic household location.', group, situation: groupLabels[group],
-      priority: accommodationNeeded ? 'P1' : group === 'A' || group === 'B' || (group === 'C' && index % 3 === 0) ? 'P2' : 'P3',
+      address: `${place.label}, ${place.municipality}`, addressNote: 'Approximate household location.', group, situation: groupLabels[group],
+      priority: index === 0 ? 'P3' : accommodationNeeded ? 'P1' : group === 'A' || group === 'B' || (group === 'C' && index % 3 === 0) ? 'P2' : 'P3',
       priorityReason: accommodationNeeded ? 'No lasting accommodation solution is available.' : group === 'B' ? 'Access is restricted and the damage is not established.' : group === 'A' ? 'The home is uninhabitable; the household has a temporary place to stay.' : 'No immediate accommodation need has been reported.',
       accommodationNeeded, accommodationPlaced: false,
       currentAccommodation: accommodationNeeded ? 'Temporary arrangement needs replacement.' : group === 'A' || group === 'B' ? 'Staying with relatives; no immediate placement requested.' : 'At home.',
-      access: group === 'B' ? 'Restricted' : group === 'C' || closed ? 'Permitted' : index % 4 === 0 ? 'Restricted' : 'Unknown',
-      coverage: closed ? 'Reviewed in demo' : stage >= 2 ? 'Proposal in demo' : 'Not reviewed', catNat: 'Not verified', opened: true, waitingHours: 2 + (index * 3) % 19,
-      event: 'Flooding', eventDate: '2026-10-20', date: '2026-10-20', reportedAt: '2026-10-22', stage, occupancy: 'Owner-occupier', needs,
-      summary: unknownDamage ? 'The situation is being qualified. Physical property damage has not been established.' : closed ? 'No outstanding assistance or damage claim remains in this fictional record.' : 'Flood-related damage has been reported. The scope and cost remain subject to review.',
+      access: index === 0 ? 'Unknown' : group === 'B' ? 'Restricted' : group === 'C' || closed ? 'Permitted' : index % 4 === 0 ? 'Restricted' : 'Unknown',
+      coverage: closed ? 'Reviewed' : stage >= 2 ? 'Proposal' : 'Not reviewed', catNat: 'Not verified', opened: true,
+      waitingHours: Math.floor((Date.parse('2026-10-22T12:00:00+02:00') - Date.parse(reportedAt)) / 3600000),
+      event: 'Flooding', eventDate: '2026-10-20', date: '2026-10-20', reportedAt, stage, occupancy: 'Owner-occupier', needs,
+      summary: closed ? 'The household reported no property damage or outstanding assistance need. The file was closed after contact.' : situationNotes[group][index % situationNotes[group].length],
       moneyLines,
-      chronology: [{ label: 'Report received', at: '2026-10-22T08:30:00+02:00' }]
+      chronology: [{ label: 'Report received', at: reportedAt }, ...(closed ? [{ label: 'Claim closed without a payment.', at: '2026-10-22T11:45:00+02:00' }] : [])]
     }
   })]
 }
@@ -115,7 +156,7 @@ export function useInsurerWorkspace() {
     return {
       ...claim, stageLabel: claimStages[claim.stage],
       priority: claim.accommodationPlaced && claim.priority === 'P1' ? 'P2' : claim.priority,
-      priorityReason: claim.accommodationPlaced ? 'Accommodation is arranged in demo; damage and access still require review.' : claim.priorityReason,
+      priorityReason: claim.accommodationPlaced ? 'Accommodation is arranged; damage and site access still require review.' : claim.priorityReason,
       grossEstimate: money.reduce((sum, line) => sum + (line.amount ?? 0), 0),
       estimateIncomplete: money.some(line => line.amount === null),
       approvedAmount: money.reduce((sum, line) => sum + line.approved, 0), paidAmount: money.reduce((sum, line) => sum + line.paid, 0),
@@ -209,7 +250,7 @@ export function useInsurerWorkspace() {
       await new Promise(resolve => setTimeout(resolve, 550))
       if (epoch !== client.value.revision) return
       action()
-    } catch { state.value.error = 'The simulation could not be completed. Please try again.' }
+    } catch { state.value.error = 'The update could not be completed. Please try again.' }
     finally { if (epoch === client.value.revision) state.value.pending = false }
   }
   function simulateOutage() {
@@ -221,7 +262,7 @@ export function useInsurerWorkspace() {
       provider.available = false
       state.value.outage = provider.id
       state.value.missions.forEach(mission => { if (mission.providerId === provider.id && mission.status === 'Scheduled') mission.status = 'Disrupted' })
-      log('Provider outage simulated')
+      log('Provider availability changed')
     })
   }
   function applyPlan() {
@@ -232,7 +273,7 @@ export function useInsurerWorkspace() {
       plan.changes.forEach(change => {
         const mission = state.value.missions.find(item => item.id === change.mission.id)
         Object.assign(mission, { providerId: change.replacement.id, start: change.start, end: change.end, status: 'Scheduled', estimate: mission.estimate + change.costDelta })
-        log('Mission reassigned in demo', mission.claimId)
+        log('Mission reassigned', mission.claimId)
       })
       state.value.planApplied = true
     })
@@ -243,7 +284,7 @@ export function useInsurerWorkspace() {
       state.value.missions = createMissions(state.value.portfolio)
       state.value.outage = null
       state.value.planApplied = false
-      log('Resource simulation reset')
+      log('Resource plan restored')
     })
   }
   function permitAccess() {
@@ -251,7 +292,7 @@ export function useInsurerWorkspace() {
     const id = selected.value.id
     return simulate(() => {
       state.value.overrides[id] = { ...state.value.overrides[id], access: 'Permitted' }
-      log('Site access permitted in the fictional scenario', id)
+      log('Access permission previewed', id)
     })
   }
   function scheduleSelected() {
@@ -265,7 +306,7 @@ export function useInsurerWorkspace() {
         if (!provider) { unscheduled += 1; continue }
         const source = state.value.missions.find(item => item.id === mission.id)
         Object.assign(source, { providerId: provider.id, status: 'Scheduled', start: '2026-10-23T09:00:00+02:00', end: mission.skill === 'Cleaning and drying' ? '2026-10-23T17:00:00+02:00' : '2026-10-23T10:00:00+02:00' })
-        log('Accessible mission scheduled in demo', id)
+        log('Accessible mission scheduled', id)
       }
       if (unscheduled) state.value.error = 'Some proposed missions have no qualified capacity available. They remain unassigned.'
     })
@@ -275,9 +316,9 @@ export function useInsurerWorkspace() {
     const id = selected.value.id
     return simulate(() => {
       const provider = providers.value.find(item => item.skill === 'Temporary accommodation' && item.available && item.remaining > 0)
-      if (!provider) { state.value.error = 'No household accommodation slot is available in this fixture.'; return }
+      if (!provider) { state.value.error = 'No household accommodation slot is currently available.'; return }
       state.value.overrides[id] = { ...state.value.overrides[id], accommodationPlaced: true }
-      log('One household accommodation slot assigned in demo', id)
+      log('Household accommodation placement previewed', id)
     })
   }
   function planAssistance() {
@@ -294,7 +335,7 @@ export function useInsurerWorkspace() {
         estimate: claim.moneyLines.find(line => line.id === benefitIds[skill])?.amount ?? null })
       added = true
     }
-    if (added) log('Assistance needs converted to draft missions in demo', claim.id)
+    if (added) log('Assistance needs converted to draft missions', claim.id)
   }
   return { state, view, panel, detailOpen, selectedId, selected, query, page, pageCount, pageClaims, claims, filtered, queue, providers, missions, selectedMissions, stats, options, replan,
     claimGeojson, providerGeojson, assignmentGeojson, proposedGeojson, selectClaim, updateFilter, clearFilters, simulateOutage, applyPlan, cancelOutage, permitAccess, placeAccommodation, scheduleSelected, planAssistance }

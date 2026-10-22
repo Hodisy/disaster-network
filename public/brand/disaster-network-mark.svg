@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Disaster Network</title>
+  <path d="M17 15V49L47 32L17 15Z" stroke="#19191B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="17" cy="15" r="6" fill="#19191B"/>
+  <circle cx="17" cy="49" r="6" fill="#19191B"/>
+  <circle cx="47" cy="32" r="6" fill="#19191B"/>
+</svg>

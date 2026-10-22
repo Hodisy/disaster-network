@@ -1,6 +1,6 @@
 import { claimStages, createReferenceClaim } from './useClaimScenario.js'
 
-import { DEMO_CUSTOMER_ID } from '../config/demo.js'
+import { DEMO_CUSTOMER_ID, DEMO_CONTRACT_NUMBER } from '../config/demo.js'
 
 const steps = claimStages
 const documents = [
@@ -11,14 +11,14 @@ const documents = [
 const stepDescriptions = [
   'Add your documents to complete your claim file.',
   'All three requested documents have been collected.',
-  'A fictional coverage proposal is available.',
-  'Interventions are simulated.',
-  'The demo journey is complete.'
+  'A coverage proposal is ready for review.',
+  'Review access and provider availability before arranging visits.',
+  'The claim file is closed.'
 ]
 const script = [
-  { transcript: 'Hello, I am Jules. Water has entered my house in Istres. The ground floor is flooded.', response: 'I am here to help, Jules. Your fictional identity has been confirmed for this demo. Are you safe, and is your home still habitable?' },
+  { transcript: `Hello, I am Jules. My contract number is ${DEMO_CONTRACT_NUMBER}. Water entered the ground floor of my home in Istres, and I need help with accommodation.`, response: 'I can help with that, Jules. Are you and everyone in your household safe, and can you still stay in your home?' },
   { transcript: 'My partner, our child and I are safe at my sister’s home. There are three of us. We cannot return home, and we cannot stay here for much longer. I do not know whether access is allowed.', response: 'Thank you, Jules. I have noted temporary accommodation, electrical safety, cleaning and drying, storage, and a damage assessment. Physical visits depend on confirmed access. Nothing has been booked at this stage.' },
-  { transcript: 'All right. I can take photos and prepare a list of the damaged furniture. What should I send you?', response: 'Your report is ready. Open your claim, then add photos of the damage, proof of address, and an inventory of damaged belongings. You can follow the next steps in My claim.' }
+  { transcript: 'I already have photos taken before we left. I can prepare a provisional list of damaged belongings. What should I send you?', response: 'Your report is ready. In My claim, add the photos you already have, proof of address and a provisional inventory. Urgent accommodation assistance does not need to wait for a complete inventory. Do not return to the property while access is uncertain.' }
 ]
 
 const initialState = () => ({
@@ -36,8 +36,8 @@ function createMockGateway() {
     respond: turn => wait(script[turn].response, 1100),
     openClaim: () => wait(createReferenceClaim()),
     sendMessage: (text, stage) => wait(stage === 0
-      ? 'Thank you, Jules. Your message has been received in this demo. You can add the missing documents listed in your claim whenever you are ready.'
-      : 'Thank you, Jules. Your message has been received in this demo. Your documents have been collected. The timeline on the right shows the current stage of your claim.', 1100),
+      ? 'Your message has been added to the claim, Jules. Add the supporting documents already available to you; an initial inventory can remain provisional.'
+      : 'Your message has been added to the claim, Jules. The requested categories have been collected and still require review. The timeline shows the next step.', 1100),
     advance: stage => wait(stage + 1, 800)
   }
 }
@@ -83,7 +83,7 @@ export function useDemo() {
       call.complete = call.turn === script.length
       call.phase = 'ready'
     } catch {
-      if (isCurrent()) { call.phase = 'idle'; state.value.error = 'The simulation was interrupted. You can try again.' }
+      if (isCurrent()) { call.phase = 'idle'; state.value.error = 'The conversation was interrupted. You can try again.' }
     }
   }
 
@@ -117,7 +117,7 @@ export function useDemo() {
     try {
       if (state.value.files.length + selected.length > 12) throw new Error('You can keep up to 12 files in this tab.')
       const total = [...state.value.files, ...selected].reduce((sum, file) => sum + file.size, 0)
-      if (total > 30 * 1024 * 1024) throw new Error('This demo allows up to 30 MB of files in total.')
+      if (total > 30 * 1024 * 1024) throw new Error('You can keep up to 30 MB of files in this browser.')
       const accepted = []
       for (const file of selected) {
         if (file.size > 10 * 1024 * 1024) throw new Error('Each file must be smaller than 10 MB.')
@@ -163,7 +163,7 @@ export function useDemo() {
       if (revision !== version() || state.value.claim?.source === 'postgresql') return false
       addMessage('adviser', result.data)
       return true
-    } catch { if (revision === version()) state.value.error = 'The simulated reply could not be displayed.'; return false }
+    } catch { if (revision === version()) state.value.error = 'The reply could not be displayed.'; return false }
     finally { if (revision === version()) state.value.busy = null }
   }
 
@@ -177,21 +177,21 @@ export function useDemo() {
       const result = await gateway.advance(claim.stage)
       if (revision !== version() || state.value.claim?.source === 'postgresql') return
       claim.stage = result.data
-      if (claim.stage === 2) claim.coverage = 'Proposal in demo'
+      if (claim.stage === 2) claim.coverage = 'Proposal'
       const messages = {
-        2: 'A demo coverage proposal is available for the reported damage. It is fictional, has no contractual value, and does not constitute a real coverage decision.',
-        3: 'Assistance arrangements have been simulated. Physical visits still depend on site access and assessment. No real booking, payment or intervention has been made.',
-        4: 'Claim closure has been simulated. No actual payment or settlement has taken place.'
+        2: 'A coverage proposal is ready for review. The reported damage, applicable limits and supporting evidence still need to be assessed.',
+        3: 'The assistance plan is prepared. Physical visits remain subject to confirmed access and provider availability. Accommodation remains a proposal until a booking is confirmed.',
+        4: 'The claim file is closed. No payment has been recorded.'
       }
       addMessage('adviser', messages[claim.stage])
-    } catch { if (revision === version()) state.value.error = 'This step could not be simulated. Please try again.' }
+    } catch { if (revision === version()) state.value.error = 'This step could not be completed. Please try again.' }
     finally { if (revision === version()) state.value.busy = null }
   }
 
   function reset() {
     const nextRevision = version() + 1
     state.value.files.forEach(file => URL.revokeObjectURL(file.url))
-    state.value = { ...initialState(), revision: nextRevision, notice: 'The demo has been reset.' }
+    state.value = { ...initialState(), revision: nextRevision, notice: 'Local workspace cleared.' }
   }
 
   return { state, customerId: DEMO_CUSTOMER_ID, steps, stepDescriptions, scenarioDate: '2026-10-20', eventDate: '2026-10-20', documentRows, received, stageLabel, speak, stopCall, openClaim, addFiles, removeFile, sendMessage, advance, reset }

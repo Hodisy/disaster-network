@@ -17,6 +17,13 @@ export function useDemoSettings() {
   const maintenanceKey = ref('')
   const error = ref('')
   const result = ref(null)
+  const localConfirming = ref(false)
+
+  function resetLocal() {
+    if (!localConfirming.value || pending.value) return
+    reset()
+    localConfirming.value = false
+  }
 
   function requestReset() {
     if (pending.value) return
@@ -55,5 +62,5 @@ export function useDemoSettings() {
     }
   }
 
-  return { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase }
+  return { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase, localConfirming, resetLocal }
 }

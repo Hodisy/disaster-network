@@ -1,7 +1,7 @@
 <script setup>
 const { t } = useAppI18n()
-const props = defineProps({ active: String, account: String, menuOpen: Boolean, resetOpen: Boolean, locale: String })
-const emit = defineEmits(['toggle-account', 'close-account', 'switch-account', 'toggle-reset', 'reset', 'set-locale'])
+const props = defineProps({ active: String, account: String, menuOpen: Boolean, locale: String })
+const emit = defineEmits(['toggle-account', 'close-account', 'switch-account', 'set-locale'])
 const accountTrigger = ref(null)
 const accountPopover = ref(null)
 watch(() => props.menuOpen, async open => {
@@ -11,7 +11,6 @@ watch(() => props.menuOpen, async open => {
 })
 function closeOverlays() {
   if (props.menuOpen) emit('close-account')
-  if (props.resetOpen) emit('toggle-reset')
 }
 </script>
 
@@ -36,12 +35,10 @@ function closeOverlays() {
           </div>
           <button ref="accountTrigger" class="account-button" :aria-expanded="menuOpen" aria-haspopup="dialog" :aria-label="t('Switch account: {name}, {role}', { name: account === 'client' ? 'Jules' : 'Allstorm Insurance', role: t(account === 'client' ? 'Client account' : 'Insurer account') })" @click="$emit('toggle-account')"><span class="avatar" :class="{ 'insurer-avatar': account === 'insurer' }">{{ account === 'client' ? 'J' : 'AS' }}</span><span>{{ account === 'client' ? 'Jules' : 'Allstorm Insurance' }}<small>{{ t(account === 'client' ? 'Client account' : 'Insurer account') }}</small></span><UiIcon name="ChevronsUpDown" :size="15" /></button>
         </div>
-        <div v-if="resetOpen" class="reset-confirm"><p>{{ t('Restart the demo? Local documents and messages will be cleared.') }}</p><div><UiButton class="small" @click="$emit('toggle-reset')">{{ t('Cancel') }}</UiButton><UiButton class="dark small" @click="$emit('reset')">{{ t('Restart') }}</UiButton></div></div>
-        <button class="reset-button" :aria-expanded="resetOpen" @click="$emit('toggle-reset')"><UiIcon name="RotateCcw" :size="14" />{{ t('Reset demo') }}</button>
       </div>
     </aside>
     <div class="workspace">
-      <header class="topbar"><div class="breadcrumb">{{ t(account === 'client' ? 'Client workspace' : 'Insurer workspace') }}<UiIcon name="ChevronRight" :size="13" /><span>{{ t(active === 'hotline' ? 'Hotline' : active === 'client' ? 'My claim' : active === 'settings' ? 'Settings' : 'Operations') }}</span></div><div class="topbar-controls"><NuxtLink to="/settings" class="settings-link" :class="{ selected: active === 'settings' }" :aria-label="t('Demo settings')" :title="t('Demo settings')" :aria-current="active === 'settings' ? 'page' : undefined"><UiIcon name="Settings" :size="16" /></NuxtLink><LanguageToggle :locale="locale" @change="$emit('set-locale', $event)" /><span class="demo-tag"><span class="small-dot" />{{ t('Demo') }}</span></div></header>
+      <header class="topbar"><div class="breadcrumb">{{ t(account === 'client' ? 'Client workspace' : 'Insurer workspace') }}<UiIcon name="ChevronRight" :size="13" /><span>{{ t(active === 'hotline' ? 'Hotline' : active === 'client' ? 'My claim' : active === 'settings' ? 'Settings' : 'Operations') }}</span></div><div class="topbar-controls"><NuxtLink to="/settings" class="settings-link" :class="{ selected: active === 'settings' }" :aria-label="t('Settings')" :title="t('Settings')" :aria-current="active === 'settings' ? 'page' : undefined"><UiIcon name="Settings" :size="16" /></NuxtLink><LanguageToggle :locale="locale" @change="$emit('set-locale', $event)" /></div></header>
       <main id="main-content" tabindex="-1"><slot /></main>
     </div>
   </div>
@@ -69,8 +66,6 @@ function closeOverlays() {
 .account-button small, .account-option small { display: block; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 400; }
 .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 33px; height: 33px; border-radius: 50%; background: #19191b; color: #fff; font-size: 11px; font-weight: 500; letter-spacing: -.2px; }
 .avatar.insurer-avatar { background: #e8e8eb; color: #57575e; }
-.reset-button { display: flex; align-items: center; gap: 12px; width: calc(100% - 20px); margin: 9px 10px 0; padding: 17px 2px 6px; border-top: 1px solid #e3e3e4; color: #5b5b63; font-size: 11px; text-align: left; }
-.reset-button:hover { color: var(--ink); }
 .dismiss-layer { position: fixed; z-index: 39; inset: 0; cursor: default; }
 .account-popover { position: absolute; z-index: 40; left: 0; bottom: calc(100% + 6px); width: 258px; padding: 10px; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 9px 30px #14141b13, 0 2px 5px #14141b05; animation: pop-in .15s ease-out; }
 .popover-heading { display: flex; align-items: center; justify-content: space-between; padding: 4px 7px 10px; font-size: 11px; font-weight: 500; }
@@ -78,9 +73,6 @@ function closeOverlays() {
 .account-option > span:nth-child(2) { flex: 1; }
 .account-option:hover { background: #f5f5f6; }
 .account-option.current { background: #fafafa; }
-.reset-confirm { padding: 13px; border: 1px solid var(--border); border-radius: 10px; margin: 10px 0; background: white; box-shadow: 0 2px 10px #00000005; }
-.reset-confirm p { font-size: 12px; line-height: 1.6; color: #696973; }
-.reset-confirm > div { display: flex; gap: 6px; margin-top: 12px; }
 .workspace { display: flex; flex: 1; flex-direction: column; margin-left: 260px; min-width: 0; }
 .topbar { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; height: 58px; padding: 0 28px; border-bottom: 1px solid var(--border); }
 .settings-link { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: #93939c; border-radius: 6px; }
@@ -89,8 +81,6 @@ function closeOverlays() {
 .topbar-controls { display: flex; align-items: center; gap: 18px; }
 .breadcrumb { display: flex; align-items: center; gap: 13px; font-size: 12px; color: #75757f; }
 .breadcrumb > span { color: var(--ink); }
-.demo-tag { display: inline-flex; align-items: center; gap: 8px; color: #777780; font-size: 11px; white-space: nowrap; }
-.small-dot { display: inline-block; width: 7px; height: 7px; flex-shrink: 0; background: #b1b1b7; border-radius: 50%; }
 .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 27px; height: 27px; border-radius: 6px; color: #787882; padding: 0; }
 .icon-button:hover { background: #f1f1f3; color: var(--ink); }
 .icon-button:disabled { opacity: .4; }

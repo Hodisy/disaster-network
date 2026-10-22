@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import * as claims from '../../repositories/hotlineClaims.js'
 import { readIncidentContext } from '../../repositories/incidentContext.js'
-import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE } from '../../../app/config/demo.js'
+import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, DEMO_CONTRACT_NUMBER, normalizeContractNumber } from '../../../app/config/demo.js'
 
 export const NEEDS = ['accommodation', 'essential_items', 'electrical_safety', 'cleaning_drying', 'moving_storage', 'contents', 'building']
 const string = { type: 'string' }
@@ -66,7 +66,7 @@ export async function runTool(session, config, name, raw) {
   const args = argsFor(name, raw)
   if (session.closed || session.closing) fail('SESSION_CLOSED')
   if (name === 'find_demo_customer') {
-    if (args.first_name.trim().toLowerCase() !== 'jules' || args.contract_number.trim().toUpperCase() !== 'ALL-DEMO-001') return { found: false }
+    if (args.first_name.trim().toLowerCase() !== 'jules' || normalizeContractNumber(args.contract_number) !== DEMO_CONTRACT_NUMBER) return { found: false }
     const challenge = await claims.verificationQuestion(config, args.first_name, args.contract_number)
     session.challengeIssued = true
     return { found: true, ...challenge }
@@ -96,7 +96,7 @@ export async function runTool(session, config, name, raw) {
     const policy = await claims.readPolicy(config)
     const warnings = []
     if (args.household_size !== current.household_size) warnings.push('The declared household differs from the policy. A handler must review it.')
-    if (args.accommodation_nights > policy.coverage_data.accommodation_max_nights) warnings.push('The requested stay exceeds the fictional policy limit and requires separate review.')
+    if (args.accommodation_nights > policy.coverage_data.accommodation_max_nights) warnings.push('The requested stay exceeds the policy limit and requires separate review.')
     if (args.safe !== 'yes') warnings.push('Safety is not confirmed. Do not enter an unsafe property.')
     if (current.closed_at) fail('CLAIM_CLOSED')
     // The draft hash is independent of tool call IDs, preventing duplicate writes on retries.

@@ -34,7 +34,7 @@ const reportText = computed(() => [
   `${t('Approved commitment')}: ${formatMoney(stats.value.approved)}`, `${t('Paid')}: ${formatMoney(stats.value.paid)}`, '',
   t('Priority is based on needs, not claim value.'),
   t('Confirm accommodation needs; review access before scheduling physical work; use qualified available providers.'),
-  t('Demo coverage is contractual and fictional. Statutory CatNat recognition is not verified.'),
+  t('The contractual flood cover is reviewed separately from statutory CatNat recognition, which remains unverified.'),
   t('Gross estimates are not reserves, approved amounts, or measured savings.'), '',
   ...state.value.audit.map(entry => t(entry.label))
 ].join('\n'))
@@ -51,16 +51,16 @@ useHead(() => ({ title: t('Insurer workspace — Disaster Network') }))
 
 <template>
   <div class="insurer-page">
-    <p v-if="clientClaimState.claim?.source === 'postgresql'" class="live-report-source">{{ t('Jules: saved Live report from PostgreSQL. The other 79 households, financial estimates and resource actions remain frontend simulations.') }}</p>
+    <p v-if="clientClaimState.claim?.source === 'postgresql'" class="live-report-source">{{ t('Jules’s report is saved. The portfolio view includes his existing claim.') }}</p>
     <p v-if="clientClaimState.claim?.source === 'postgresql' && claimError" class="live-report-source" role="alert">{{ t(hotlineErrorPhrase(claimError)) }}</p>
     <header class="operations-heading">
       <div><h1>{{ t('Berre Lagoon flood response') }}</h1><p>{{ t('Event: {date}', { date: formatDate('2026-10-20', { month: 'short' }) }) }}<span>·</span>{{ t('Scenario snapshot: {date}', { date: formatDate('2026-10-22', { month: 'short' }) }) }}</p></div>
-      <div class="heading-actions"><span class="demo-data">{{ t('Synthetic data / Illustrative locations') }}</span><UiButton v-if="view === 'mobilization' && !state.outage" class="small" :disabled="state.pending" @click="outage"><UiIcon name="TriangleAlert" :size="14" />{{ t('Simulate provider outage') }}</UiButton><UiButton v-else-if="state.outage" class="small" :disabled="state.pending" @click="resetResources">{{ t('Reset resource simulation') }}</UiButton><UiButton class="dark" @click="reportOpen = true"><UiIcon name="FileText" :size="15" />{{ t('Situation report') }}</UiButton></div>
+      <div class="heading-actions"><span class="demo-data">{{ t('Portfolio snapshot') }}</span><UiButton v-if="view === 'mobilization' && !state.outage" class="small" :disabled="state.pending" @click="outage"><UiIcon name="TriangleAlert" :size="14" />{{ t('Preview provider outage') }}</UiButton><UiButton v-else-if="state.outage" class="small" :disabled="state.pending" @click="resetResources">{{ t('Restore resource plan') }}</UiButton><UiButton class="dark" @click="reportOpen = true"><UiIcon name="FileText" :size="15" />{{ t('Situation report') }}</UiButton></div>
     </header>
-    <div class="portfolio-summary"><span><strong>{{ stats.households }}</strong>{{ t('Portfolio households') }}</span><span><strong>{{ stats.people }}</strong>{{ t('Synthetic people') }}</span><span><strong>{{ stats.opened }}</strong>{{ t('Opened reports') }}</span><span class="summary-amount"><strong>{{ formatMoney(stats.gross) }}</strong>{{ t('Known gross estimates') }}<small>{{ t('Partial · Not approved') }}</small></span></div>
+    <div class="portfolio-summary"><span><strong>{{ stats.households }}</strong>{{ t('Portfolio households') }}</span><span><strong>{{ stats.people }}</strong>{{ t('People in households') }}</span><span><strong>{{ stats.opened }}</strong>{{ t('Opened reports') }}</span><span class="summary-amount"><strong>{{ formatMoney(stats.gross) }}</strong>{{ t('Known gross estimates') }}<small>{{ t('Partial · Not approved') }}</small></span></div>
     <InsurerToolbar :view="view" :query="query" :options="options" :advanced="advanced" @view="view = $event" @filter="updateFilter" @advanced="advanced = !advanced" @clear="clearFilters" />
     <div v-if="state.error" class="operation-error" role="alert">{{ t(state.error) }}</div>
-    <div v-if="state.outage" class="operation-notice" :class="{ applied: state.planApplied }" role="status"><UiIcon :name="state.planApplied ? 'CircleCheck' : 'TriangleAlert'" :size="15" /><span>{{ t(state.planApplied ? 'The replacement plan has been applied in the demo. No real dispatch or payment occurred.' : 'A drying provider is unavailable. Review the affected missions before applying a replacement.') }}</span><button v-if="!state.planApplied" @click="replanOpen = true; view = 'mobilization'">{{ t('Review replanning') }}<UiIcon name="ChevronRight" :size="13" /></button></div>
+    <div v-if="state.outage" class="operation-notice" :class="{ applied: state.planApplied }" role="status"><UiIcon :name="state.planApplied ? 'CircleCheck' : 'TriangleAlert'" :size="15" /><span>{{ t(state.planApplied ? 'Replacement plan updated. Review provider availability before dispatch.' : 'A drying provider is unavailable. Review the affected missions before applying a replacement.') }}</span><button v-if="!state.planApplied" @click="replanOpen = true; view = 'mobilization'">{{ t('Review replanning') }}<UiIcon name="ChevronRight" :size="13" /></button></div>
     <div class="operations-body" :class="{ mobilization: view === 'mobilization' }">
       <div class="map-column">
         <InsurerMap :claims="claimGeojson" :providers="providerGeojson" :assignments="assignmentGeojson" :proposed="proposedGeojson" :selected="selected" :show-popup="popupOpen && !detailOpen" :stats="stats" @select="selectOnMap" @open="openClaim" @provider="selectProvider" @dismiss-popup="popupOpen = false" />
@@ -75,7 +75,8 @@ useHead(() => ({ title: t('Insurer workspace — Disaster Network') }))
         </div>
       </aside>
     </div>
-    <UiDialog v-if="reportOpen" :title="t('Disaster Network — Situation report')" wide @close="reportOpen = false"><div class="report-body"><span class="report-label">{{ t('Frontend-generated demo report') }}</span><p>{{ t('This snapshot uses the entire portfolio, independently of current map filters.') }}</p><pre>{{ reportText }}</pre><UiButton class="dark" @click="downloadReport"><UiIcon name="Download" :size="15" />{{ t('Download report') }}</UiButton></div></UiDialog>
+    <p class="live-report-source">{{ t('Evaluation workspace · Fictional records and providers. Actions do not dispatch services.') }}</p>
+    <UiDialog v-if="reportOpen" :title="t('Disaster Network — Situation report')" wide @close="reportOpen = false"><div class="report-body"><span class="report-label">{{ t('Portfolio situation report') }}</span><p>{{ t('This snapshot uses the entire portfolio, independently of current map filters.') }}</p><pre>{{ reportText }}</pre><UiButton class="dark" @click="downloadReport"><UiIcon name="Download" :size="15" />{{ t('Download report') }}</UiButton></div></UiDialog>
   </div>
 </template>
 

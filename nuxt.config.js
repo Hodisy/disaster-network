@@ -26,6 +26,7 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'en' },
       title: 'Disaster Network — Support for your insurance claim',
+      link: [{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/brand/disaster-network-mark.svg' }],
       meta: [{ name: 'description', content: 'Fictional insurance demo. Live AI voice is optional; files stay in your browser.' }]
     }
   }

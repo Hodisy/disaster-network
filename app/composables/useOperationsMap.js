@@ -34,9 +34,21 @@ export function useOperationsMap(container, props, emit) {
     map.fitBounds(bounds, { padding: 30, duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 550 })
   }
   function zoom(delta) { if (map) map.easeTo({ zoom: map.getZoom() + delta, duration: 200 }) }
+  function applyReferencePalette() {
+    if (props.appearance !== 'reference-a') return
+    // Match reference A's water/park palette without changing real basemap geometry.
+    for (const layer of map.getStyle().layers || []) {
+      const name = `${layer.id} ${layer['source-layer'] || ''}`
+      if (layer.type === 'background') map.setPaintProperty(layer.id, 'background-color', '#f7f9f8')
+      else if (layer.type === 'fill' && /water/i.test(name)) map.setPaintProperty(layer.id, 'fill-color', '#bcdff6')
+      else if (layer.type === 'fill' && /park|forest|wood|grass/i.test(layer.id)) map.setPaintProperty(layer.id, 'fill-color', '#e6eddf')
+      else if (layer.type === 'line' && /waterway/i.test(name)) map.setPaintProperty(layer.id, 'line-color', '#bcdff6')
+      else if (layer.type === 'symbol' && /water/i.test(name)) map.setPaintProperty(layer.id, 'text-color', '#6195bd')
+    }
+  }
   function localizeControls() {
     if (!map) return
-    map.getCanvas().setAttribute('aria-label', t('Synthetic household claims around Berre Lagoon'))
+    map.getCanvas().setAttribute('aria-label', t('Reported households around Berre Lagoon'))
     const attribution = container.value?.querySelector('.maplibregl-ctrl-attrib-button')
     if (attribution) {
       attribution.title = t('Map attribution')
@@ -60,12 +72,13 @@ export function useOperationsMap(container, props, emit) {
         center: [5.04, 43.505], zoom: 10, attributionControl: false,
         dragRotate: false, pitchWithRotate: false, maxPitch: 0,
         canvasContextAttributes: { antialias: true },
-        locale: { 'Map.Title': t('Synthetic household claims around Berre Lagoon'), 'AttributionControl.ToggleAttribution': t('Map attribution') }
+        locale: { 'Map.Title': t('Reported households around Berre Lagoon'), 'AttributionControl.ToggleAttribution': t('Map attribution') }
       })
       map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-right')
       localizeControls()
       map.on('load', () => {
         if (removed || current !== generation) return
+        applyReferencePalette()
         const colors = ['match', ['get', 'priority'], 'P1', '#ed4548', 'P2', '#efaa24', '#9397a4']
         map.addSource('claims', { type: 'geojson', data: props.claims, cluster: true, clusterRadius: 38, clusterMaxZoom: 13,
           clusterProperties: { urgent: ['+', ['case', ['==', ['get', 'priority'], 'P1'], 1, 0]], priority: ['+', ['case', ['==', ['get', 'priority'], 'P2'], 1, 0]] } })

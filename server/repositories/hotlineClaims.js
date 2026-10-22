@@ -2,7 +2,7 @@ import { Client } from 'pg'
 import { scrypt, timingSafeEqual, randomUUID } from 'node:crypto'
 import { promisify } from 'node:util'
 import { connectionOptions } from './demoDatabase.js'
-import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE } from '../../app/config/demo.js'
+import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, DEMO_CONTRACT_NUMBER, normalizeContractNumber } from '../../app/config/demo.js'
 import { DEMO_LOCK_NAME, DEMO_SCHEMA_MARKER } from '../../database/operations.js'
 
 const deriveKey = promisify(scrypt)
@@ -27,12 +27,12 @@ async function transaction(config, work) {
   } finally { await client.end().catch(() => {}) }
 }
 
-export function verificationQuestion(config, firstName = 'Jules', contractNumber = 'ALL-DEMO-001') {
+export function verificationQuestion(config, firstName = 'Jules', contractNumber = DEMO_CONTRACT_NUMBER) {
   return transaction(config, async db => {
     const { rows } = await db.query(`SELECT c.verification_question FROM disaster_demo.customers c
       JOIN disaster_demo.policies p ON p.customer_id = c.id
-      WHERE c.id = $1 AND p.id = $2 AND lower(c.first_name) = lower($3) AND upper(p.contract_number) = upper($4)`,
-    [DEMO_CUSTOMER_ID, DEMO_POLICY_ID, firstName.trim(), contractNumber.trim()])
+      WHERE c.id = $1 AND p.id = $2 AND lower(c.first_name) = lower($3) AND regexp_replace(p.contract_number, '[[:space:]-]', '', 'g') = $4`,
+    [DEMO_CUSTOMER_ID, DEMO_POLICY_ID, firstName.trim(), normalizeContractNumber(contractNumber)])
     if (!rows[0]) throw fail('DEMO_RECORD_MISSING')
     return { question: rows[0].verification_question, fictional: true }
   })
@@ -74,7 +74,7 @@ export function readPolicy(config) {
 }
 
 async function claimProjection(db) {
-  const { rows } = await db.query(`SELECT c.*, c.updated_at::text AS version_token, p.address, u.first_name, u.household_size,
+  const { rows } = await db.query(`SELECT c.*, c.updated_at::text AS version_token, p.address, p.contract_number, p.product_name, u.first_name, u.household_size,
     (SELECT data->'draft' FROM disaster_demo.claim_events WHERE claim_id = c.id AND type = 'hotline_report_saved' ORDER BY created_at DESC LIMIT 1) AS intake_details
     FROM disaster_demo.claims c JOIN disaster_demo.policies p ON p.id = c.policy_id
     JOIN disaster_demo.customers u ON u.id = p.customer_id

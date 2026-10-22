@@ -25,7 +25,7 @@ export function useHotlineClaim() {
       const previous = state.value.claim
       const hasAccommodation = claim.intake_details?.accommodationNeeded === true
       state.value.claim = { ...createReferenceClaim(), id: DEMO_CLAIM_REFERENCE, databaseId: DEMO_CLAIM_ID, policyId: DEMO_POLICY_ID, customerId: DEMO_CUSTOMER_ID,
-        name: claim.first_name, initials: 'J', address: claim.address, event: 'Flooding', date: '2026-10-20', eventDate: '2026-10-20', reportedAt: '2026-10-22',
+        contractNumber: claim.contract_number, productName: claim.product_name, name: claim.first_name, initials: 'J', address: claim.address, event: 'Flooding', date: '2026-10-20', eventDate: '2026-10-20', reportedAt: '2026-10-22',
         stage: Math.max(0, stages.indexOf(claim.stage)), summary: claim.summary || '', summaryIsUserContent: true,
         needs: claim.needs.filter(need => need.status === 'identified').map(need => needLabels[need.code]).filter(Boolean),
         householdSize: claim.household_size, declaredHouseholdSize: claim.intake_details?.householdSize, currentAccommodation: claim.intake_details?.currentAccommodation || '', currentAccommodationIsUserContent: true,

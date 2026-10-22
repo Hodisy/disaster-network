@@ -27,7 +27,8 @@ export default defineEventHandler(async event => {
     }
     const owner = ownerFor(config, getCookie(event, 'disaster-hotline'))
     let result
-    if (action === 'session') result = await createSession(owner, config, body, ip)
+    if (action === 'access') result = { authorized: true }
+    else if (action === 'session') result = await createSession(owner, config, body, ip)
     else if (action === 'status') result = snapshot(owner)
     else if (action === 'claim') result = await readAuthorizedClaim(owner, config)
     else if (action === 'confirm') result = await confirmReport(owner, config, body)
