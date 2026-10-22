@@ -26,6 +26,10 @@ export async function connectionOptions(config) {
     try { ca = await readFile(resolve(certificatePath), 'utf8') }
     catch { throw failure('DATABASE_NOT_CONFIGURED') }
   }
+  // Runtime consoles may flatten PEM newlines or store them as literal \n.
+  // Restore PEM formatting while retaining the same CA and verified TLS.
+  ca = ca.replace(/\\n/g, '\n').replace(/(-----BEGIN CERTIFICATE-----)([\s\S]*?)(-----END CERTIFICATE-----)/g,
+    (_match, start, body, end) => [start, ...(body.replace(/\s/g, '').match(/.{1,64}/g) || []), end].join('\n'))
   try {
     // Explicit fields prevent URL sslmode parameters from overriding verified TLS.
     return {
