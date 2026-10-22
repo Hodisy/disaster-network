@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+.git
+.data
+.env
+.env.*
+*.log
+.DS_Store
+package-lock.json
+docs
+*.pdf
+AIVEN_SETUP.txt
+CONTEXTE_REPRISE.txt
