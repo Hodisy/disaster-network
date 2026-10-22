@@ -1,20 +1,24 @@
-const steps = ['À constituer', 'Dossier complet', 'Proposition de garantie', 'Assistance organisée', 'Sinistre clôturé']
+import { claimStages, createReferenceClaim } from './useClaimScenario.js'
+
+import { DEMO_CUSTOMER_ID } from '../config/demo.js'
+
+const steps = claimStages
 const documents = [
-  { id: 'photos', title: 'Photos des dommages', description: 'Vues d’ensemble et détails des zones touchées.' },
-  { id: 'address', title: 'Justificatif de domicile', description: 'Un document récent à votre nom.' },
-  { id: 'inventory', title: 'Inventaire des biens', description: 'La liste des biens endommagés, même provisoire.' }
+  { id: 'photos', title: 'Damage photos', description: 'Overview and close-up photos of affected areas.' },
+  { id: 'address', title: 'Proof of address', description: 'A recent document in your name.' },
+  { id: 'inventory', title: 'Belongings inventory', description: 'A list of damaged belongings, even a provisional one.' }
 ]
 const stepDescriptions = [
-  'Ajoutez vos documents pour compléter votre dossier.',
-  'Vos trois pièces ont été réunies.',
-  'Une proposition fictive est disponible.',
-  'Les interventions sont simulées.',
-  'Le parcours de démonstration est terminé.'
+  'Add your documents to complete your claim file.',
+  'All three requested documents have been collected.',
+  'A fictional coverage proposal is available.',
+  'Interventions are simulated.',
+  'The demo journey is complete.'
 ]
 const script = [
-  { transcript: 'Bonjour, je suis Claire Martin. L’eau est entrée dans ma maison à Istres. Le rez-de-chaussée est inondé.', response: 'Je suis là pour vous accompagner, Claire. Vous êtes bien identifiée pour cette démonstration. Êtes-vous en sécurité et votre logement est-il toujours habitable ?' },
-  { transcript: 'Oui, je suis en sécurité chez ma sœur. Mais je ne peux pas rentrer chez moi. Il y a encore de l’eau et les meubles sont abîmés.', response: 'Merci Claire. Je note un besoin d’hébergement temporaire et d’assèchement. Une expertise permettra aussi d’évaluer les dommages. Rien n’est encore réservé à ce stade.' },
-  { transcript: 'D’accord. Je peux prendre des photos et préparer la liste des meubles endommagés. Que dois-je vous transmettre ?', response: 'Votre déclaration est prête. Ouvrez votre dossier, puis ajoutez des photos des dommages, un justificatif de domicile et un inventaire des biens. Vous pourrez suivre la suite depuis « Mon dossier ».' }
+  { transcript: 'Hello, I am Jules. Water has entered my house in Istres. The ground floor is flooded.', response: 'I am here to help, Jules. Your fictional identity has been confirmed for this demo. Are you safe, and is your home still habitable?' },
+  { transcript: 'My partner, our child and I are safe at my sister’s home. There are three of us. We cannot return home, and we cannot stay here for much longer. I do not know whether access is allowed.', response: 'Thank you, Jules. I have noted temporary accommodation, electrical safety, cleaning and drying, storage, and a damage assessment. Physical visits depend on confirmed access. Nothing has been booked at this stage.' },
+  { transcript: 'All right. I can take photos and prepare a list of the damaged furniture. What should I send you?', response: 'Your report is ready. Open your claim, then add photos of the damage, proof of address, and an inventory of damaged belongings. You can follow the next steps in My claim.' }
 ]
 
 const initialState = () => ({
@@ -30,27 +34,31 @@ function createMockGateway() {
   return {
     transcribe: turn => wait(script[turn].transcript, 1400),
     respond: turn => wait(script[turn].response, 1100),
-    openClaim: () => wait({
-      id: 'CAT-2026-001', name: 'Claire Martin', address: '12 rue des Oliviers, 13800 Istres',
-      event: 'Inondation', date: '22 octobre 2026', stage: 0,
-      summary: 'Le rez-de-chaussée est inondé et le logement est temporairement inhabitable. Claire est en sécurité chez sa sœur. Des meubles ont été endommagés.',
-      needs: ['Hébergement temporaire', 'Assèchement', 'Expertise']
-    }),
+    openClaim: () => wait(createReferenceClaim()),
     sendMessage: (text, stage) => wait(stage === 0
-      ? 'Merci Claire, votre message est bien reçu dans cette démonstration. Vous pouvez ajouter les pièces manquantes indiquées dans votre dossier, à votre rythme.'
-      : 'Merci Claire, votre message est bien reçu dans cette démonstration. Vos pièces sont réunies. Le parcours à droite indique l’étape actuelle de votre dossier.', 1100),
+      ? 'Thank you, Jules. Your message has been received in this demo. You can add the missing documents listed in your claim whenever you are ready.'
+      : 'Thank you, Jules. Your message has been received in this demo. Your documents have been collected. The timeline on the right shows the current stage of your claim.', 1100),
     advance: stage => wait(stage + 1, 800)
   }
 }
 
 export function useDemo() {
   const state = useState('cat-response-demo', initialState)
+  // Migrate only canonical demo identity fields; user messages and local files stay intact.
+  if (state.value.claim?.id === 'CAT-2026-001' && state.value.claim.source !== 'postgresql' && !state.value.claim.moneyLines) {
+    state.value.claim = { ...createReferenceClaim(), stage: state.value.claim.stage }
+  }
   const gateway = createMockGateway()
   const version = () => state.value.revision
-  const documentRows = computed(() => documents.map(doc => ({ ...doc, files: state.value.files.filter(file => file.kind === doc.id) })))
+  const documentRows = computed(() => {
+    const live = state.value.claim?.source === 'postgresql'
+    const rows = live ? [...documents, { id: 'invoice', title: 'Item invoices', description: 'Later invoices can support individual item values.' }].filter(doc => state.value.claim.requiredDocuments.includes(doc.id)) : documents
+    return rows.map(doc => ({ ...doc, files: state.value.files.filter(file => file.kind === doc.id) }))
+  })
   const received = computed(() => documentRows.value.filter(doc => doc.files.length > 0).length)
   const stageLabel = computed(() => steps[state.value.claim?.stage ?? 0])
-  const addMessage = (role, text) => state.value.messages.push({ id: crypto.randomUUID(), role, text, time: new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(new Date()) })
+  // Keep canonical English phrases and ISO dates so existing content can change language.
+  const addMessage = (role, text) => state.value.messages.push({ id: crypto.randomUUID(), role, text, createdAt: new Date().toISOString() })
 
   async function speak() {
     const call = state.value.call
@@ -75,7 +83,7 @@ export function useDemo() {
       call.complete = call.turn === script.length
       call.phase = 'ready'
     } catch {
-      if (isCurrent()) { call.phase = 'idle'; state.value.error = 'La simulation a été interrompue. Vous pouvez réessayer.' }
+      if (isCurrent()) { call.phase = 'idle'; state.value.error = 'The simulation was interrupted. You can try again.' }
     }
   }
 
@@ -92,32 +100,33 @@ export function useDemo() {
     try {
       const result = await gateway.openClaim()
       if (revision !== version()) return
+      if (state.value.claim?.source === 'postgresql') return
       state.value.claim = result.data
-      addMessage('adviser', 'Bonjour Claire, votre déclaration est reçue. Ajoutez les trois pièces demandées pour compléter votre dossier. Je reste à votre disposition ici.')
-    } catch { if (revision === version()) state.value.error = 'Le dossier n’a pas pu être ouvert. Réessayez.' }
+      addMessage('adviser', 'Hello Jules, your report has been received. Add the three requested documents to complete your claim file. You can contact me here whenever you need help.')
+    } catch { if (revision === version()) state.value.error = 'The claim could not be opened. Please try again.' }
     finally { if (revision === version()) state.value.busy = null }
   }
 
   async function addFiles(kind, inputFiles) {
     state.value.error = ''
     if (!state.value.claim || state.value.busy || state.value.claim.stage > 1) return
-    if (!documents.some(doc => doc.id === kind)) return
+    if (!documentRows.value.some(doc => doc.id === kind)) return
     const revision = version()
     state.value.busy = 'files'
     const selected = Array.from(inputFiles || [])
     try {
-      if (state.value.files.length + selected.length > 12) throw new Error('Vous pouvez conserver jusqu’à 12 fichiers dans cet onglet.')
+      if (state.value.files.length + selected.length > 12) throw new Error('You can keep up to 12 files in this tab.')
       const total = [...state.value.files, ...selected].reduce((sum, file) => sum + file.size, 0)
-      if (total > 30 * 1024 * 1024) throw new Error('La limite de cette démonstration est de 30 Mo au total.')
+      if (total > 30 * 1024 * 1024) throw new Error('This demo allows up to 30 MB of files in total.')
       const accepted = []
       for (const file of selected) {
-        if (file.size > 10 * 1024 * 1024) throw new Error('Chaque fichier doit peser moins de 10 Mo.')
+        if (file.size > 10 * 1024 * 1024) throw new Error('Each file must be smaller than 10 MB.')
         const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer())
         const isPdf = bytes[0] === 37 && bytes[1] === 80 && bytes[2] === 68 && bytes[3] === 70 && bytes[4] === 45
         const isPng = [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => bytes[index] === byte)
         const isJpg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255
         const isWebp = String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP'
-        if (!isPdf && !isPng && !isJpg && !isWebp) throw new Error('Format non reconnu. Choisissez une photo JPG, PNG, WebP ou un PDF.')
+        if (!isPdf && !isPng && !isJpg && !isWebp) throw new Error('Unrecognised format. Choose a JPG, PNG, WebP image or a PDF.')
         if (revision !== version()) return
         accepted.push({ file, type: isPdf ? 'application/pdf' : 'image' })
       }
@@ -125,11 +134,12 @@ export function useDemo() {
       // Validate the entire selection before adding any browser-local previews.
       for (const { file, type } of accepted) state.value.files.push({ id: crypto.randomUUID(), kind, name: file.name, size: file.size, type, url: URL.createObjectURL(file) })
       updateCompleteness()
-    } catch (error) { if (revision === version()) { updateCompleteness(); state.value.error = error.message || 'Le fichier n’a pas pu être lu.' } }
+    } catch (error) { if (revision === version()) { updateCompleteness(); state.value.error = error.message || 'The file could not be read.' } }
     finally { if (revision === version()) state.value.busy = null }
   }
 
   function updateCompleteness() {
+    if (state.value.claim?.source === 'postgresql') return
     if (state.value.claim && state.value.claim.stage <= 1) state.value.claim.stage = received.value === documents.length ? 1 : 0
   }
 
@@ -143,45 +153,46 @@ export function useDemo() {
 
   async function sendMessage(text) {
     const value = text.trim().slice(0, 2000)
-    if (!value || !state.value.claim || state.value.busy) return false
+    if (!value || !state.value.claim || state.value.claim.source === 'postgresql' || state.value.busy) return false
     state.value.busy = 'message'
     state.value.error = ''
     addMessage('client', value)
     const revision = version()
     try {
       const result = await gateway.sendMessage(value, state.value.claim.stage)
-      if (revision !== version()) return false
+      if (revision !== version() || state.value.claim?.source === 'postgresql') return false
       addMessage('adviser', result.data)
       return true
-    } catch { if (revision === version()) state.value.error = 'La réponse simulée n’a pas pu être affichée.'; return false }
+    } catch { if (revision === version()) state.value.error = 'The simulated reply could not be displayed.'; return false }
     finally { if (revision === version()) state.value.busy = null }
   }
 
   async function advance() {
     const claim = state.value.claim
-    if (!claim || claim.stage < 1 || claim.stage > 3 || state.value.busy) return
+    if (!claim || claim.source === 'postgresql' || claim.stage < 1 || claim.stage > 3 || state.value.busy) return
     state.value.busy = 'advance'
     state.value.error = ''
     const revision = version()
     try {
       const result = await gateway.advance(claim.stage)
-      if (revision !== version()) return
+      if (revision !== version() || state.value.claim?.source === 'postgresql') return
       claim.stage = result.data
+      if (claim.stage === 2) claim.coverage = 'Proposal in demo'
       const messages = {
-        2: 'Une proposition de garantie de démonstration est disponible pour les dommages déclarés. Elle est fictive, sans valeur contractuelle, et ne constitue pas une acceptation réelle de prise en charge.',
-        3: 'Assistance organisée dans le scénario : hébergement et assèchement prévus le 23 octobre 2026. Aucune réservation ni intervention réelle n’a été effectuée.',
-        4: 'La clôture du sinistre a été simulée. Aucun paiement ni règlement réel n’a eu lieu.'
+        2: 'A demo coverage proposal is available for the reported damage. It is fictional, has no contractual value, and does not constitute a real coverage decision.',
+        3: 'Assistance arrangements have been simulated. Physical visits still depend on site access and assessment. No real booking, payment or intervention has been made.',
+        4: 'Claim closure has been simulated. No actual payment or settlement has taken place.'
       }
       addMessage('adviser', messages[claim.stage])
-    } catch { if (revision === version()) state.value.error = 'Cette étape n’a pas pu être simulée. Réessayez.' }
+    } catch { if (revision === version()) state.value.error = 'This step could not be simulated. Please try again.' }
     finally { if (revision === version()) state.value.busy = null }
   }
 
   function reset() {
     const nextRevision = version() + 1
     state.value.files.forEach(file => URL.revokeObjectURL(file.url))
-    state.value = { ...initialState(), revision: nextRevision, notice: 'La démonstration a été réinitialisée.' }
+    state.value = { ...initialState(), revision: nextRevision, notice: 'The demo has been reset.' }
   }
 
-  return { state, steps, stepDescriptions, documentRows, received, stageLabel, speak, stopCall, openClaim, addFiles, removeFile, sendMessage, advance, reset }
+  return { state, customerId: DEMO_CUSTOMER_ID, steps, stepDescriptions, scenarioDate: '2026-10-20', eventDate: '2026-10-20', documentRows, received, stageLabel, speak, stopCall, openClaim, addFiles, removeFile, sendMessage, advance, reset }
 }

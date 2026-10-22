@@ -1,7 +1,7 @@
 <script setup>
-import { Mic, FileText, ChevronsUpDown, ChevronRight, ChevronDown, ArrowUp, ArrowUpRight, RotateCcw, X, Check, Plus, Paperclip, Phone, ShieldCheck, House, Waves, CircleCheck, Circle, ArrowLeft, ArrowRight, Building2, Clock3, Image, Trash2, Square, MoreHorizontal, PanelLeftClose } from 'lucide-vue-next'
+import { Settings, Mic, FileText, ChevronsUpDown, ChevronRight, ChevronDown, ArrowUp, ArrowUpRight, RotateCcw, X, Check, Plus, Paperclip, Phone, ShieldCheck, House, Waves, CircleCheck, Circle, ArrowLeft, ArrowRight, Building2, Clock3, Image, Trash2, Square, MoreHorizontal, PanelLeftClose, Search, SlidersHorizontal, MapPin, Truck, Users, CalendarDays, Download, ChevronLeft, TriangleAlert, LocateFixed, Minus } from 'lucide-vue-next'
 defineProps({ name: { type: String, required: true }, size: { type: Number, default: 18 } })
-const icons = { Mic, FileText, ChevronsUpDown, ChevronRight, ChevronDown, ArrowUp, ArrowUpRight, RotateCcw, X, Check, Plus, Paperclip, Phone, ShieldCheck, House, Waves, CircleCheck, Circle, ArrowLeft, ArrowRight, Building2, Clock3, Image, Trash2, Square, MoreHorizontal, PanelLeftClose }
+const icons = { Settings, Mic, FileText, ChevronsUpDown, ChevronRight, ChevronDown, ArrowUp, ArrowUpRight, RotateCcw, X, Check, Plus, Paperclip, Phone, ShieldCheck, House, Waves, CircleCheck, Circle, ArrowLeft, ArrowRight, Building2, Clock3, Image, Trash2, Square, MoreHorizontal, PanelLeftClose, Search, SlidersHorizontal, MapPin, Truck, Users, CalendarDays, Download, ChevronLeft, TriangleAlert, LocateFixed, Minus }
 </script>
 
 <template>

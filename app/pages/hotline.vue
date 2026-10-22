@@ -1,27 +1,63 @@
 <script setup>
-const { state, speak, stopCall, openClaim } = useDemo()
-const call = computed(() => state.value.call)
-const orbState = computed(() => ({ listening: 'listening', responding: 'solving', ready: call.value.complete ? 'searching' : 'weaving', paused: 'searching' })[call.value.phase] || 'searching')
+const { t, formatDate } = useAppI18n()
+const { state, speak, stopCall, openClaim, eventDate } = useDemo()
+const { source, refreshLiveClaim, claimError } = useHotlineClaim()
+const { live, active, start, end, interruptSpeech, confirm, playAudio } = useLiveHotline()
+const accessKey = ref('')
+const call = computed(() => source.value === 'live' ? { ...live, complete: false, turn: 0 } : state.value.call)
+const orbState = computed(() => ({ listening: 'listening', responding: 'solving', connecting: 'weaving', closing: 'weaving', ready: call.value.complete ? 'searching' : 'weaving', paused: 'searching' })[call.value.phase] || 'searching')
 const label = computed(() => {
-  if (call.value.complete) return 'Votre déclaration est prête'
-  return ({ listening: 'Je vous écoute…', responding: 'Un instant, je prépare votre réponse…', paused: 'Appel interrompu · Cliquez pour reprendre', ready: 'Cliquez pour continuer' })[call.value.phase] || 'Cliquez pour commencer'
+  if (source.value === 'live') return ({ connecting: 'Connecting to Live voice…', listening: 'Listening…', responding: 'Assistant transcript arriving…', closing: 'Ending the call…', ended: 'Call ended', error: 'Live voice unavailable' })[live.phase] || 'Click to start Live voice'
+  if (call.value.complete) return 'Your report is ready'
+  return ({ listening: 'Listening…', responding: 'One moment, preparing your reply…', paused: 'Call interrupted · Click to resume', ready: 'Click to continue' })[call.value.phase] || 'Click to get started'
 })
+async function useOrb() {
+  if (source.value === 'mock') return speak()
+  if (active.value) return interruptSpeech()
+  try { await start(accessKey.value) } finally { accessKey.value = '' }
+}
+function changeMode(value) { if (active.value) return; stopCall(); source.value = value; accessKey.value = ''; claimError.value = '' }
 async function createClaim() { await openClaim(); if (state.value.claim) await navigateTo('/client') }
+onMounted(() => { if (source.value === 'live') void refreshLiveClaim({ quiet: true }) })
 onBeforeUnmount(stopCall)
-useHead({ title: 'Hotline — Disaster Network' })
+useHead(() => ({ title: t('Hotline — Disaster Network') }))
 </script>
 
 <template>
   <div class="hotline-page">
-    <div class="hotline-heading"><h1>On vous écoute.</h1><p>Racontez ce qui s’est passé. On s’occupe de la suite.</p></div>
-    <VoiceSession :phase="call.phase" :complete="call.complete" :turn="call.turn" :transcript="call.transcript" :response="call.response" :orb-state="orbState" :label="label" @speak="speak" />
-    <div v-if="state.error" class="inline-error" role="alert">{{ state.error }}</div>
-    <div v-if="call.complete || state.claim" class="claim-ready"><span><UiIcon name="CircleCheck" :size="17" />{{ state.claim ? 'Votre dossier est ouvert.' : 'Tout est prêt pour ouvrir votre dossier.' }}</span><UiButton v-if="state.claim" to="/client" class="dark">Voir mon dossier<UiIcon name="ArrowRight" :size="15" /></UiButton><UiButton v-else class="dark" :disabled="!!state.busy" @click="createClaim">{{ state.busy === 'open' ? 'Ouverture…' : 'Ouvrir mon dossier' }}<UiIcon name="ArrowRight" :size="15" /></UiButton></div>
-    <footer class="quiet-footer"><UiIcon name="ShieldCheck" :size="14" /><span>Rivage Assurance est fictive. Scénario d’inondation à Istres, le 22 octobre 2026.</span></footer>
+    <div class="hotline-heading"><h1>{{ t('We are listening.') }}</h1><p>{{ t('Tell us what happened. We will help with the next steps.') }}</p></div>
+    <div class="mode-controls" :aria-label="t('Conversation mode')">
+      <button :aria-pressed="source === 'live'" :disabled="active" @click="changeMode('live')">{{ t('Live AI voice') }}</button>
+      <button :aria-pressed="source === 'mock'" :disabled="active" @click="changeMode('mock')">{{ t('Scripted demo · Microphone off') }}</button>
+    </div>
+    <div v-if="source === 'live'" class="live-controls">
+      <p>{{ t('Your voice is sent to OpenAI during the call. The assistant is AI; Allstorm and all insurance outcomes are fictional.') }}</p>
+      <label v-if="!active && !live.authorized">{{ t('Demo access key') }}<input v-model="accessKey" type="password" autocomplete="off" maxlength="256" :placeholder="t('Enter the private demo access key')" @keydown.enter.prevent="useOrb" /></label>
+      <span v-if="active">{{ t(live.verified ? 'Demo customer verified for this call' : 'Customer verification pending') }}</span>
+      <UiButton v-if="active" class="small" :disabled="live.phase === 'closing'" @click="end()">{{ t('End call') }}</UiButton>
+      <UiButton v-if="live.audioBlocked" class="small" @click="playAudio">{{ t('Play assistant audio') }}</UiButton>
+    </div>
+    <VoiceSession :phase="call.phase" :complete="call.complete" :turn="call.turn" :transcript="call.transcript" :response="call.response" :orb-state="orbState" :label="label" :live="source === 'live'" :microphone-state="live.microphoneState" :busy="source === 'live' && ['connecting', 'closing'].includes(live.phase)" @speak="useOrb" />
+    <div v-if="source === 'live' && live.error" class="inline-error" role="alert">{{ t(live.error) }}</div>
+    <div v-if="source === 'live' && claimError" class="inline-error" role="alert">{{ t(hotlineErrorPhrase(claimError)) }}</div>
+    <LiveReportReview v-if="source === 'live' && live.draft" :draft="live.draft" :busy="live.confirming" @confirm="confirm" />
+    <p v-if="source === 'live' && live.saved" class="live-saved">{{ t('Report saved in PostgreSQL. Requested documents are available in My claim.') }}</p>
+    <div v-if="source === 'mock' && state.error" class="inline-error" role="alert">{{ t(state.error) }}</div>
+    <div v-if="(source === 'mock' && call.complete) || state.claim" class="claim-ready"><span><UiIcon name="CircleCheck" :size="17" />{{ t(state.claim ? 'Your claim is open.' : 'Everything is ready to open your claim.') }}</span><UiButton v-if="state.claim" to="/client" class="dark">{{ t('View my claim') }}<UiIcon name="ArrowRight" :size="15" /></UiButton><UiButton v-else class="dark" :disabled="!!state.busy" @click="createClaim">{{ t(state.busy === 'open' ? 'Opening…' : 'Open my claim') }}<UiIcon name="ArrowRight" :size="15" /></UiButton></div>
+    <footer class="quiet-footer"><UiIcon name="ShieldCheck" :size="14" /><span>{{ t('Allstorm Insurance is fictional. Flood scenario in Istres, {date}.', { date: formatDate(eventDate) }) }}</span></footer>
   </div>
 </template>
 
 <style scoped>
+.mode-controls { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
+.mode-controls button { padding: 9px 14px; border: 1px solid #e3e3e7; border-radius: 20px; font-size: 11px; color: #777781; }
+.mode-controls button[aria-pressed="true"] { background: #202023; color: white; border-color: #202023; }
+.mode-controls button:disabled { opacity: .6; }
+.live-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin: 16px auto 0; max-width: 720px; font-size: 11px; color: #85858e; }
+.live-controls p { flex-basis: 100%; text-align: center; line-height: 1.6; }
+.live-controls label { display: flex; align-items: center; gap: 10px; }
+.live-controls input { border: 1px solid #dedee3; border-radius: 8px; padding: 9px 12px; width: 270px; font-size: 11px; }
+.live-saved { margin: 20px 0; color: #46755a; font-size: 12px; line-height: 1.6; }
 .inline-error { margin: 16px 0; padding: 12px 15px; color: #a13d3d; background: #fff5f4; border: 1px solid #f1d8d5; border-radius: 8px; font-size: 12px; line-height: 1.6; }
 .hotline-page { max-width: 1160px; margin: 0 auto; padding: 44px 52px 24px; }
 .hotline-heading { text-align: center; }

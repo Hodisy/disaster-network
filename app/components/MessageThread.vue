@@ -1,13 +1,14 @@
 <script setup>
+const { t, formatTime } = useAppI18n()
 defineProps({ messages: Array, draft: String, busy: Boolean })
 defineEmits(['update:draft', 'send'])
 </script>
 
 <template>
-  <section class="message-thread" aria-label="Messagerie simulée">
-    <div class="section-heading"><h2>On reste en contact</h2><span class="subtle-tag">Échanges simulés</span></div>
-    <div class="messages" role="log" aria-live="polite" aria-label="Fil de discussion"><div v-for="message in messages" :key="message.id" class="message" :class="message.role"><span :class="message.role === 'client' ? 'avatar tiny' : 'adviser-mark small-mark'">{{ message.role === 'client' ? 'CM' : '//' }}</span><div><div class="speaker-label">{{ message.role === 'client' ? 'Vous' : 'Rivage' }}<time>{{ message.time }}</time></div><p>{{ message.text }}</p></div></div><div v-if="busy" class="message adviser"><span class="adviser-mark small-mark">//</span><div class="typing-dots" aria-label="Préparation de la réponse simulée"><i /><i /><i /></div></div></div>
-    <form class="message-composer" @submit.prevent="$emit('send')"><textarea :value="draft" rows="2" maxlength="2000" aria-label="Votre message" placeholder="Écrire un message…" :disabled="busy" @input="$emit('update:draft', $event.target.value)" @keydown.enter.exact.prevent="$emit('send')" /><div><span>Entrée pour envoyer</span><button class="send-button" :disabled="busy || !draft.trim()" aria-label="Envoyer le message"><UiIcon name="ArrowUp" :size="16" /></button></div></form>
+  <section class="message-thread" :aria-label="t('Simulated messaging')">
+    <div class="section-heading"><h2>{{ t('Stay in touch') }}</h2><span class="subtle-tag">{{ t('Simulated messages') }}</span></div>
+    <div class="messages" role="log" aria-live="polite" :aria-label="t('Message thread')"><div v-for="message in messages" :key="message.id" class="message" :class="message.role"><span :class="message.role === 'client' ? 'avatar tiny' : 'adviser-mark small-mark'">{{ message.role === 'client' ? 'J' : '//' }}</span><div><div class="speaker-label">{{ message.role === 'client' ? t('You') : 'Allstorm' }}<time :datetime="message.createdAt">{{ message.createdAt ? formatTime(message.createdAt) : message.time }}</time></div><p>{{ message.role === 'client' ? message.text : t(message.text) }}</p></div></div><div v-if="busy" class="message adviser"><span class="adviser-mark small-mark">//</span><div class="typing-dots" :aria-label="t('Preparing the simulated reply')"><i /><i /><i /></div></div></div>
+    <form class="message-composer" @submit.prevent="$emit('send')"><textarea :value="draft" rows="2" maxlength="2000" :aria-label="t('Your message')" :placeholder="t('Write a message…')" :disabled="busy" @input="$emit('update:draft', $event.target.value)" @keydown.enter.exact.prevent="$emit('send')" /><div><span>{{ t('Press Enter to send') }}</span><button class="send-button" :disabled="busy || !draft.trim()" :aria-label="t('Send message')"><UiIcon name="ArrowUp" :size="16" /></button></div></form>
   </section>
 </template>
 

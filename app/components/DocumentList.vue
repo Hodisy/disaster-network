@@ -1,5 +1,6 @@
 <script setup>
-defineProps({ rows: Array, busy: Boolean, locked: Boolean })
+const { t } = useAppI18n()
+defineProps({ rows: Array, busy: Boolean, locked: Boolean, localOnly: Boolean })
 defineEmits(['add', 'preview', 'remove'])
 function select(event, kind, emit) { emit('add', kind, event.target.files); event.target.value = '' }
 </script>
@@ -7,8 +8,8 @@ function select(event, kind, emit) { emit('add', kind, event.target.files); even
 <template>
   <div class="documents-list">
     <div v-for="row in rows" :key="row.id" class="document-row">
-      <div class="document-main"><span class="document-icon" :class="{ received: row.files.length }"><UiIcon :name="row.files.length ? 'Check' : row.id === 'photos' ? 'Image' : 'FileText'" :size="17" /></span><div><h3>{{ row.title }}</h3><p>{{ row.description }}</p></div><label v-if="!locked" class="button small file-label" :class="{ disabled: busy }"><UiIcon name="Plus" :size="14" />{{ row.files.length ? 'Ajouter' : 'Joindre' }}<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple :disabled="busy" :aria-label="`Ajouter : ${row.title}`" @change="select($event, row.id, $emit)" /></label><span v-else class="received-label">Reçue</span></div>
-      <ul v-if="row.files.length" class="file-list"><li v-for="file in row.files" :key="file.id"><button class="file-preview-button" @click="$emit('preview', file)"><UiIcon :name="file.type === 'application/pdf' ? 'FileText' : 'Image'" :size="14" /><span>{{ file.name }}</span><UiIcon name="ArrowUpRight" :size="13" /></button><button v-if="!locked" class="icon-button" :disabled="busy" :aria-label="`Retirer ${file.name}`" @click="$emit('remove', file.id)"><UiIcon name="X" :size="13" /></button></li></ul>
+      <div class="document-main"><span class="document-icon" :class="{ received: row.files.length }"><UiIcon :name="row.files.length ? 'Check' : row.id === 'photos' ? 'Image' : 'FileText'" :size="17" /></span><div><h3>{{ t(row.title) }}</h3><p>{{ t(row.description) }}</p></div><label v-if="!locked" class="button small file-label" :class="{ disabled: busy }"><UiIcon name="Plus" :size="14" />{{ t(row.files.length ? 'Add' : 'Attach') }}<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple :disabled="busy" :aria-label="t('Add: {document}', { document: t(row.title) })" @change="select($event, row.id, $emit)" /></label><span v-else class="received-label">{{ t(localOnly ? 'Not uploaded' : 'Received') }}</span></div>
+      <ul v-if="row.files.length" class="file-list"><li v-for="file in row.files" :key="file.id"><button class="file-preview-button" @click="$emit('preview', file)"><UiIcon :name="file.type === 'application/pdf' ? 'FileText' : 'Image'" :size="14" /><span>{{ file.name }}</span><UiIcon name="ArrowUpRight" :size="13" /></button><button v-if="!locked" class="icon-button" :disabled="busy" :aria-label="t('Remove {name}', { name: file.name })" @click="$emit('remove', file.id)"><UiIcon name="X" :size="13" /></button></li></ul>
     </div>
   </div>
 </template>

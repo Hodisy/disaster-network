@@ -1,14 +1,15 @@
 <script setup>
+const { t, formatDate } = useAppI18n()
 defineProps({ claim: Object, steps: Array, stepDescriptions: Array })
 </script>
 
 <template>
-  <aside class="claim-details" aria-label="Informations du dossier">
-    <div class="identity-card"><span class="avatar large">CM</span><div><h2>{{ claim.name }}</h2><p>Assurée fictive</p><span class="subtle-tag">Rivage Assurance</span></div></div>
-    <section class="detail-section"><h2>Le sinistre<UiIcon name="ArrowUpRight" :size="15" /></h2><dl><div><dt>Dossier</dt><dd>{{ claim.id }}</dd></div><div><dt>Événement</dt><dd>{{ claim.event }}</dd></div><div><dt>Date</dt><dd>{{ claim.date }}</dd></div><div class="address-detail"><dt>Adresse</dt><dd>{{ claim.address }}</dd></div></dl></section>
-    <section class="detail-section"><h2>Besoins identifiés</h2><ul class="needs-list"><li v-for="(need, index) in claim.needs" :key="need"><UiIcon :name="['House', 'Waves', 'ShieldCheck'][index]" :size="15" />{{ need }}</li></ul><p class="detail-note">Besoins fictifs, à confirmer dans un parcours réel.</p></section>
-    <section class="detail-section"><h2>Le parcours</h2><ol class="stage-list"><li v-for="(step, index) in steps" :key="step" :class="{ done: claim.stage > index, current: claim.stage === index }" :aria-current="claim.stage === index ? 'step' : undefined"><span class="stage-marker"><UiIcon v-if="claim.stage > index" name="Check" :size="11" /><span v-else>{{ index + 1 }}</span></span><span><span class="stage-name">{{ step }}</span><small class="stage-description">{{ stepDescriptions[index] }}</small></span></li></ol></section>
-    <p class="contract-note"><UiIcon name="ShieldCheck" :size="14" />Garanties de démonstration, sans valeur contractuelle.</p>
+  <aside class="claim-details" :aria-label="t('Claim details')">
+    <div class="identity-card"><span class="avatar large">J</span><div><h2>{{ claim.name }}</h2><p>{{ t('Fictional policyholder') }}</p><span class="subtle-tag">Allstorm Insurance</span></div></div>
+    <section class="detail-section"><h2>{{ t('The incident') }}<UiIcon name="ArrowUpRight" :size="15" /></h2><dl><div><dt>{{ t('Claim') }}</dt><dd>{{ claim.id }}</dd></div><div><dt>{{ t('Event') }}</dt><dd>{{ t(claim.event) }}</dd></div><div><dt>{{ t('Date') }}</dt><dd>{{ formatDate(claim.eventDate || claim.date) }}</dd></div><div class="address-detail"><dt>{{ t('Address') }}</dt><dd>{{ claim.address }}</dd></div><div><dt>{{ t('Household') }}</dt><dd>{{ t('{count} people', { count: claim.householdSize }) }}</dd></div></dl><p class="detail-note">{{ t(claim.addressNote) }}</p></section>
+    <section class="detail-section"><h2>{{ t('Identified needs') }}</h2><ul class="needs-list"><li v-for="need in claim.needs" :key="need"><UiIcon :name="({ 'Temporary accommodation': 'House', 'Electrical safety': 'ShieldCheck', 'Cleaning and drying': 'Waves', 'Moving and storage': 'Truck', 'Damage assessment': 'FileText' })[need]" :size="15" />{{ t(need) }}</li></ul><p class="detail-note">{{ t('Fictional needs, subject to confirmation in a real claim.') }}</p></section>
+    <section class="detail-section"><h2>{{ t('Claim journey') }}</h2><ol class="stage-list"><li v-for="(step, index) in steps" :key="step" :class="{ done: claim.stage > index, current: claim.stage === index }" :aria-current="claim.stage === index ? 'step' : undefined"><span class="stage-marker"><UiIcon v-if="claim.stage > index" name="Check" :size="11" /><span v-else>{{ index + 1 }}</span></span><span><span class="stage-name">{{ t(step) }}</span><small class="stage-description">{{ t(stepDescriptions[index]) }}</small></span></li></ol></section>
+    <p class="contract-note"><UiIcon name="ShieldCheck" :size="14" />{{ t('Demo coverage only. No contractual value.') }}</p>
   </aside>
 </template>
 

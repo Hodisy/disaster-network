@@ -29,3 +29,9 @@ When a separate backend phase is authorized, reuse the existing PostgreSQL servi
 Database credentials belong exclusively on the server. Never place them in public Nuxt configuration or frontend code. The application does not currently read `DATABASE_URL`; adding a connection variable alone does not implement persistence. Migrations, TLS verification, connection pooling, and durable document storage require that later backend work.
 
 Source: [Connect services to Aiven Runtime](https://aiven.io/docs/products/runtime/connect-services-to-apps).
+
+## Local PostgreSQL load - 22 October 2026
+
+The user subsequently authorized connecting to the existing service and loading the small Jules dataset. The ignored local `.env` now contains the connection URL, CA path, reset feature flag and maintenance key. Verified TLS connectivity and `db:setup` succeeded. Read-only counts: nine tables, three customers/policies/claim records, four documents and eleven sections, all inside `disaster_demo`. No other schema was changed.
+
+The user subsequently authorized launching Nuxt locally and testing Settings. The reset succeeded against Aiven and the browser confirmed three restored customers, policies and claim records. Shared database modules are explicitly bundled by Nitro so compiled imports resolve correctly. No production build was run. The hosted application's connected services/environment have not been changed by this load task; `.env` is local and excluded from Git and Docker context. A hosted server requires the corresponding private runtime variables and an available CA certificate independently of this local configuration.

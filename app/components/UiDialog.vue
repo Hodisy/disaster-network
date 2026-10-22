@@ -1,4 +1,5 @@
 <script setup>
+const { t } = useAppI18n()
 defineProps({ title: String, wide: Boolean })
 const emit = defineEmits(['close'])
 const dialog = ref(null)
@@ -7,7 +8,7 @@ function backdrop(event) { if (event.target === dialog.value) emit('close') }
 </script>
 
 <template>
-  <Teleport to="body"><dialog ref="dialog" class="dialog" :class="{ wide }" aria-labelledby="dialog-title" @cancel.prevent="$emit('close')" @click="backdrop"><header><h2 id="dialog-title">{{ title }}</h2><button class="icon-button" aria-label="Fermer l’aperçu" @click="$emit('close')"><UiIcon name="X" /></button></header><div class="dialog-content"><slot /></div></dialog></Teleport>
+  <Teleport to="body"><dialog ref="dialog" class="dialog" :class="{ wide }" aria-labelledby="dialog-title" @cancel.prevent="$emit('close')" @click="backdrop"><header><h2 id="dialog-title">{{ title }}</h2><button class="icon-button" :aria-label="t('Close preview')" @click="$emit('close')"><UiIcon name="X" /></button></header><div class="dialog-content"><slot /></div></dialog></Teleport>
 </template>
 
 <style scoped>

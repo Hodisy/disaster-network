@@ -1,22 +1,28 @@
 <script setup>
+const { locale, setLocale, t } = useAppI18n()
 const route = useRoute()
 const { state, reset, stopCall } = useDemo()
 const active = computed(() => route.path.split('/')[1] || 'hotline')
-const account = computed(() => active.value === 'assureur' ? 'insurer' : 'client')
+const account = computed(() => active.value === 'insurer' ? 'insurer' : 'client')
 
 async function switchAccount(value) {
   state.value.accountMenu = false
   stopCall()
-  if (value === 'insurer') await navigateTo('/assureur')
+  if (value === 'insurer') await navigateTo('/insurer')
   else if (account.value === 'insurer') await navigateTo(state.value.claim ? '/client' : '/hotline')
 }
 async function restart() { reset(); await navigateTo('/hotline') }
 watch(() => route.path, () => { state.value.accountMenu = false; state.value.resetMenu = false })
+useHead(() => ({
+  htmlAttrs: { lang: locale.value },
+  title: t('Disaster Network — Support for your insurance claim'),
+  meta: [{ name: 'description', content: t('Fictional insurance demo. Live AI voice is optional; files stay in your browser.') }]
+}))
 </script>
 
 <template>
-  <DemoShell :active="active" :account="account" :menu-open="state.accountMenu" :reset-open="state.resetMenu" @toggle-account="state.accountMenu = !state.accountMenu; state.resetMenu = false" @close-account="state.accountMenu = false" @switch-account="switchAccount" @toggle-reset="state.resetMenu = !state.resetMenu; state.accountMenu = false" @reset="restart">
-    <div v-if="state.notice" class="toast" role="status">{{ state.notice }}<button class="icon-button" aria-label="Fermer la notification" @click="state.notice = ''"><UiIcon name="X" :size="14" /></button></div>
+  <DemoShell :locale="locale" @set-locale="setLocale" :active="active" :account="account" :menu-open="state.accountMenu" :reset-open="state.resetMenu" @toggle-account="state.accountMenu = !state.accountMenu; state.resetMenu = false" @close-account="state.accountMenu = false" @switch-account="switchAccount" @toggle-reset="state.resetMenu = !state.resetMenu; state.accountMenu = false" @reset="restart">
+    <div v-if="state.notice" class="toast" role="status">{{ t(state.notice) }}<button class="icon-button" :aria-label="t('Dismiss notification')" @click="state.notice = ''"><UiIcon name="X" :size="14" /></button></div>
     <NuxtPage />
   </DemoShell>
 </template>

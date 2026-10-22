@@ -1,6 +1,7 @@
 <script setup>
-const props = defineProps({ active: String, account: String, menuOpen: Boolean, resetOpen: Boolean })
-const emit = defineEmits(['toggle-account', 'close-account', 'switch-account', 'toggle-reset', 'reset'])
+const { t } = useAppI18n()
+const props = defineProps({ active: String, account: String, menuOpen: Boolean, resetOpen: Boolean, locale: String })
+const emit = defineEmits(['toggle-account', 'close-account', 'switch-account', 'toggle-reset', 'reset', 'set-locale'])
 const accountTrigger = ref(null)
 const accountPopover = ref(null)
 watch(() => props.menuOpen, async open => {
@@ -16,31 +17,31 @@ function closeOverlays() {
 
 <template>
   <div class="app-shell" @keydown.esc="closeOverlays">
-    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <a class="skip-link" href="#main-content">{{ t('Skip to content') }}</a>
     <aside class="sidebar">
-      <NuxtLink to="/hotline" class="brand" aria-label="Disaster Network, accueil hotline">Disaster Network<span class="brand-period">.</span></NuxtLink>
-      <div class="sidebar-label">{{ account === 'client' ? 'Espace client' : 'Espace assureur' }}</div>
-      <nav v-if="account === 'client'" class="main-nav" aria-label="Menu client">
-        <NuxtLink to="/hotline" :class="{ selected: active === 'hotline' }" :aria-current="active === 'hotline' ? 'page' : undefined"><UiIcon name="Mic" />Hotline</NuxtLink>
-        <NuxtLink to="/client" :class="{ selected: active === 'client' }" :aria-current="active === 'client' ? 'page' : undefined"><UiIcon name="FileText" />Mon dossier</NuxtLink>
+      <NuxtLink to="/hotline" class="brand" :aria-label="t('Disaster Network, hotline home')">Disaster Network<span class="brand-period">.</span></NuxtLink>
+      <div class="sidebar-label">{{ t(account === 'client' ? 'Client workspace' : 'Insurer workspace') }}</div>
+      <nav v-if="account === 'client'" class="main-nav" :aria-label="t('Client navigation')">
+        <NuxtLink to="/hotline" :class="{ selected: active === 'hotline' }" :aria-current="active === 'hotline' ? 'page' : undefined"><UiIcon name="Mic" />{{ t('Hotline') }}</NuxtLink>
+        <NuxtLink to="/client" :class="{ selected: active === 'client' }" :aria-current="active === 'client' ? 'page' : undefined"><UiIcon name="FileText" />{{ t('My claim') }}</NuxtLink>
       </nav>
-      <nav v-else class="main-nav" aria-label="Menu assureur"><NuxtLink to="/assureur" class="selected" aria-current="page"><UiIcon name="Building2" />Vue opérationnelle</NuxtLink></nav>
+      <nav v-else class="main-nav" :aria-label="t('Insurer navigation')"><NuxtLink to="/insurer" class="selected" aria-current="page"><UiIcon name="Building2" />{{ t('Operations') }}</NuxtLink></nav>
       <div class="sidebar-bottom">
         <div class="account-anchor">
-          <button v-if="menuOpen" class="dismiss-layer" aria-label="Fermer le sélecteur de compte" tabindex="-1" @click="$emit('close-account')" />
-          <div v-if="menuOpen" ref="accountPopover" class="account-popover" role="dialog" aria-label="Changer de compte">
-            <div class="popover-heading">Changer de compte<button class="icon-button" aria-label="Fermer" @click="$emit('close-account')"><UiIcon name="X" :size="15" /></button></div>
-            <button class="account-option" :class="{ current: account === 'client' }" @click="$emit('switch-account', 'client')"><span class="avatar">CM</span><span>Claire Martin<small>Compte client</small></span><UiIcon v-if="account === 'client'" name="Check" :size="16" /></button>
-            <button class="account-option" :class="{ current: account === 'insurer' }" @click="$emit('switch-account', 'insurer')"><span class="avatar insurer-avatar">RA</span><span>Rivage Assurance<small>Compte assureur · À venir</small></span><UiIcon v-if="account === 'insurer'" name="Check" :size="16" /></button>
+          <button v-if="menuOpen" class="dismiss-layer" :aria-label="t('Close account switcher')" tabindex="-1" @click="$emit('close-account')" />
+          <div v-if="menuOpen" ref="accountPopover" class="account-popover" role="dialog" :aria-label="t('Switch account')">
+            <div class="popover-heading">{{ t('Switch account') }}<button class="icon-button" :aria-label="t('Close')" @click="$emit('close-account')"><UiIcon name="X" :size="15" /></button></div>
+            <button class="account-option" :class="{ current: account === 'client' }" @click="$emit('switch-account', 'client')"><span class="avatar">J</span><span>Jules<small>{{ t('Client account') }}</small></span><UiIcon v-if="account === 'client'" name="Check" :size="16" /></button>
+            <button class="account-option" :class="{ current: account === 'insurer' }" @click="$emit('switch-account', 'insurer')"><span class="avatar insurer-avatar">AS</span><span>Allstorm Insurance<small>{{ t('Insurer account') }}</small></span><UiIcon v-if="account === 'insurer'" name="Check" :size="16" /></button>
           </div>
-          <button ref="accountTrigger" class="account-button" :aria-expanded="menuOpen" aria-haspopup="dialog" :aria-label="`Changer de compte : ${account === 'client' ? 'Claire Martin, compte client' : 'Rivage Assurance, compte assureur'}`" @click="$emit('toggle-account')"><span class="avatar" :class="{ 'insurer-avatar': account === 'insurer' }">{{ account === 'client' ? 'CM' : 'RA' }}</span><span>{{ account === 'client' ? 'Claire Martin' : 'Rivage Assurance' }}<small>{{ account === 'client' ? 'Compte client' : 'Compte assureur' }}</small></span><UiIcon name="ChevronsUpDown" :size="15" /></button>
+          <button ref="accountTrigger" class="account-button" :aria-expanded="menuOpen" aria-haspopup="dialog" :aria-label="t('Switch account: {name}, {role}', { name: account === 'client' ? 'Jules' : 'Allstorm Insurance', role: t(account === 'client' ? 'Client account' : 'Insurer account') })" @click="$emit('toggle-account')"><span class="avatar" :class="{ 'insurer-avatar': account === 'insurer' }">{{ account === 'client' ? 'J' : 'AS' }}</span><span>{{ account === 'client' ? 'Jules' : 'Allstorm Insurance' }}<small>{{ t(account === 'client' ? 'Client account' : 'Insurer account') }}</small></span><UiIcon name="ChevronsUpDown" :size="15" /></button>
         </div>
-        <div v-if="resetOpen" class="reset-confirm"><p>Recommencer le parcours ? Les pièces locales et les échanges seront effacés.</p><div><UiButton class="small" @click="$emit('toggle-reset')">Annuler</UiButton><UiButton class="dark small" @click="$emit('reset')">Recommencer</UiButton></div></div>
-        <button class="reset-button" :aria-expanded="resetOpen" @click="$emit('toggle-reset')"><UiIcon name="RotateCcw" :size="14" />Réinitialiser la démo</button>
+        <div v-if="resetOpen" class="reset-confirm"><p>{{ t('Restart the demo? Local documents and messages will be cleared.') }}</p><div><UiButton class="small" @click="$emit('toggle-reset')">{{ t('Cancel') }}</UiButton><UiButton class="dark small" @click="$emit('reset')">{{ t('Restart') }}</UiButton></div></div>
+        <button class="reset-button" :aria-expanded="resetOpen" @click="$emit('toggle-reset')"><UiIcon name="RotateCcw" :size="14" />{{ t('Reset demo') }}</button>
       </div>
     </aside>
     <div class="workspace">
-      <header class="topbar"><div class="breadcrumb">{{ account === 'client' ? 'Espace client' : 'Espace assureur' }}<UiIcon name="ChevronRight" :size="13" /><span>{{ active === 'hotline' ? 'Hotline' : active === 'client' ? 'Mon dossier' : 'Vue opérationnelle' }}</span></div><span class="demo-tag"><span class="small-dot" />Démonstration</span></header>
+      <header class="topbar"><div class="breadcrumb">{{ t(account === 'client' ? 'Client workspace' : 'Insurer workspace') }}<UiIcon name="ChevronRight" :size="13" /><span>{{ t(active === 'hotline' ? 'Hotline' : active === 'client' ? 'My claim' : active === 'settings' ? 'Settings' : 'Operations') }}</span></div><div class="topbar-controls"><NuxtLink to="/settings" class="settings-link" :class="{ selected: active === 'settings' }" :aria-label="t('Demo settings')" :title="t('Demo settings')" :aria-current="active === 'settings' ? 'page' : undefined"><UiIcon name="Settings" :size="16" /></NuxtLink><LanguageToggle :locale="locale" @change="$emit('set-locale', $event)" /><span class="demo-tag"><span class="small-dot" />{{ t('Demo') }}</span></div></header>
       <main id="main-content" tabindex="-1"><slot /></main>
     </div>
   </div>
@@ -82,6 +83,10 @@ function closeOverlays() {
 .reset-confirm > div { display: flex; gap: 6px; margin-top: 12px; }
 .workspace { display: flex; flex: 1; flex-direction: column; margin-left: 260px; min-width: 0; }
 .topbar { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 16px; height: 58px; padding: 0 28px; border-bottom: 1px solid var(--border); }
+.settings-link { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: #93939c; border-radius: 6px; }
+.settings-link:hover, .settings-link.selected { color: var(--ink); background: #f1f1f3; }
+.settings-link:focus-visible { outline: 2px solid #74747c; outline-offset: 3px; }
+.topbar-controls { display: flex; align-items: center; gap: 18px; }
 .breadcrumb { display: flex; align-items: center; gap: 13px; font-size: 12px; color: #75757f; }
 .breadcrumb > span { color: var(--ink); }
 .demo-tag { display: inline-flex; align-items: center; gap: 8px; color: #777780; font-size: 11px; white-space: nowrap; }

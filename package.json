@@ -5,11 +5,18 @@
   "scripts": {
     "dev": "nuxt dev --host 127.0.0.1",
     "build": "nuxt build",
-    "preview": "nuxt preview --host 127.0.0.1"
+    "preview": "nuxt preview --host 127.0.0.1",
+    "db:export": "bun scripts/database.js export",
+    "db:setup": "bun scripts/database.js setup",
+    "db:seed": "bun scripts/database.js seed",
+    "db:reset": "bun scripts/database.js reset"
   },
   "dependencies": {
     "lucide-vue-next": "1.0.0",
-    "nuxt": "4.6.2"
+    "maplibre-gl": "6.15.0",
+    "nuxt": "4.6.2",
+    "pg": "^8.23.1",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "node": "24.15.0"

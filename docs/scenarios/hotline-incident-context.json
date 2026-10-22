@@ -1,0 +1,16 @@
+{
+  "fictional": true,
+  "source": "docs/scenarios/insurer-workspace-brief.md",
+  "event_evidence": "docs/research/20-october-2026-flood-evidence.md",
+  "event_date": "2026-10-20",
+  "report_date": "2026-10-22",
+  "time_zone": "Europe/Paris",
+  "location": "Berre Lagoon, Istres",
+  "portfolio_households": 80,
+  "portfolio_people": 170,
+  "database_fixture_customers": 3,
+  "catnat_status": "not_verified",
+  "live_weather": false,
+  "safety": "Do not return to an unsafe property. Urgent assistance must not wait for a complete contents inventory.",
+  "financial_note": "EUR 17,500 is a gross multi-benefit synthetic estimate, not approval or payment. No booking or payment is real."
+}

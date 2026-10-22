@@ -1,33 +1,35 @@
 <script setup>
-defineProps({ phase: String, complete: Boolean, turn: Number, transcript: String, response: String, orbState: String, label: String })
+const { t } = useAppI18n()
+defineProps({ phase: String, complete: Boolean, turn: Number, transcript: String, response: String, orbState: String, label: String, live: Boolean, busy: Boolean, microphoneState: String })
 defineEmits(['speak'])
 </script>
 
 <template>
-  <section class="voice-session" aria-label="Conversation de démonstration">
+  <section class="voice-session" :class="{ live }" :aria-label="t(live ? 'Live AI conversation' : 'Demo conversation')">
     <div class="orb-stage">
-      <button class="orb-button" :class="{ 'is-listening': phase === 'listening' }" :disabled="complete" :aria-label="complete ? 'Conversation terminée' : ['listening', 'responding'].includes(phase) ? 'Interrompre l’appel simulé' : turn ? 'Continuer l’appel simulé' : 'Démarrer l’appel simulé'" @click="$emit('speak')">
+      <button class="orb-button" :class="{ 'is-listening': phase === 'listening' }" :disabled="complete || busy" :aria-label="t(live ? (['listening', 'responding'].includes(phase) ? 'Interrupt the assistant' : 'Start Live voice') : complete ? 'Conversation complete' : ['listening', 'responding'].includes(phase) ? 'Interrupt the simulated call' : turn ? 'Continue the simulated call' : 'Start the simulated call')" @click="$emit('speak')">
         <ThinkingOrb :state="orbState" :size="240" />
         <span class="orb-hover-icon"><UiIcon :name="['listening', 'responding'].includes(phase) ? 'Square' : complete ? 'Check' : 'Mic'" :size="20" /></span>
       </button>
-      <div class="voice-state" aria-live="polite"><span v-if="phase === 'listening'" class="status-dot listening-dot" />{{ label }}</div>
-      <p class="voice-disclaimer">Appel simulé<span>·</span>Aucun micro activé</p>
+      <div class="voice-state" aria-live="polite"><span v-if="phase === 'listening'" class="status-dot listening-dot" />{{ t(label) }}</div>
+      <p class="voice-disclaimer">{{ t(live ? 'Live AI voice · Fictional insurance demo' : 'Simulated call') }}<span>·</span>{{ t(live && microphoneState === 'on' ? 'Microphone is on' : live && microphoneState === 'muted' ? 'Microphone is muted' : 'Microphone is off') }}</p>
     </div>
     <div class="conversation">
-      <div class="conversation-heading"><span>La conversation</span><span v-if="turn" class="conversation-count">{{ turn }} / 3 échanges</span><span v-else class="conversation-count">En toute simplicité</span></div>
+      <div class="conversation-heading"><span>{{ t('The conversation') }}</span><span v-if="live" class="conversation-count">{{ t('Live transcript') }}</span><span v-else-if="turn" class="conversation-count">{{ t('{count} / 3 exchanges', { count: turn }) }}</span><span v-else class="conversation-count">{{ t('One step at a time') }}</span></div>
       <div class="utterance">
-        <span class="avatar tiny">CM</span>
-        <div><div class="speaker-label">Vous<span>Transcription simulée</span></div><p :class="{ 'empty-text': !transcript }">{{ transcript || 'Votre transcription apparaîtra ici. Cliquez sur l’orbe pour commencer.' }}</p></div>
+        <span class="avatar tiny">J</span>
+        <div><div class="speaker-label">{{ t('You') }}<span>{{ t(live ? 'Live transcript' : 'Simulated transcript') }}</span></div><p :class="{ 'empty-text': !transcript }">{{ transcript ? (live ? transcript : t(transcript)) : t('Your transcript will appear here. Click the orb to get started.') }}</p></div>
       </div>
       <div class="utterance adviser-utterance">
         <span class="adviser-mark"><span>//</span></span>
-        <div><div class="speaker-label">Rivage<span>Votre assistant</span></div><div v-if="phase === 'responding'" class="typing-dots" aria-label="Préparation de la réponse simulée"><i /><i /><i /></div><p v-else :class="{ 'empty-text': !response }">{{ response || 'Je suis là pour vous accompagner, à votre rythme.' }}</p></div>
+        <div><div class="speaker-label">Allstorm<span>{{ t('Your assistant') }}</span></div><div v-if="phase === 'responding' && !live" class="typing-dots" :aria-label="t('Preparing the simulated reply')"><i /><i /><i /></div><p v-else :class="{ 'empty-text': !response }">{{ response ? (live ? response : t(response)) : t('I am here to help, at your pace.') }}</p></div>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
+.voice-session.live .utterance p { max-height: 220px; overflow-y: auto; white-space: pre-wrap; }
 .avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 33px; height: 33px; border-radius: 50%; background: #19191b; color: #fff; font-size: 11px; font-weight: 500; letter-spacing: -.2px; }
 .avatar.insurer-avatar { background: #e8e8eb; color: #57575e; }
 .avatar.tiny { width: 38px; height: 38px; background: #f0f0f2; color: #46464d; font-size: 12px; }
