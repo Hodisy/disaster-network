@@ -16,7 +16,7 @@ watch(() => route.path, () => { state.value.accountMenu = false; state.value.res
 useHead(() => ({
   htmlAttrs: { lang: locale.value },
   title: t('Disaster Network — Support for your insurance claim'),
-  meta: [{ name: 'description', content: t('Fictional insurance demo. Live AI voice is optional; files stay in your browser.') }]
+  meta: [{ name: 'description', content: t('Insurance claims coordination with an AI hotline, document review and provider planning.') }]
 }))
 </script>
 

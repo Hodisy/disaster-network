@@ -47,8 +47,8 @@ export function useAppI18n() {
     }).format(new Date(value))
   }
 
-  function formatMoney(value) {
-    return new Intl.NumberFormat(locale.value === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
+  function formatMoney(value, options = {}) {
+    return new Intl.NumberFormat(locale.value === 'fr' ? 'fr-FR' : 'en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, ...options }).format(value)
   }
 
   return { locale, setLocale, t, formatDate, formatTime, formatMoney }

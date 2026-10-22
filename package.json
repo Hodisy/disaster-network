@@ -7,6 +7,7 @@
     "build": "nuxt build",
     "preview": "nuxt preview --host 127.0.0.1",
     "db:export": "bun scripts/database.js export",
+    "db:insurer": "bun scripts/prepare-insurer-data.js",
     "db:setup": "bun scripts/database.js setup",
     "db:seed": "bun scripts/database.js seed",
     "db:reset": "bun scripts/database.js reset"
@@ -15,6 +16,7 @@
     "lucide-vue-next": "1.0.0",
     "maplibre-gl": "6.15.0",
     "nuxt": "4.6.2",
+    "pdf-lib": "1.17.1",
     "pg": "^8.23.1",
     "ws": "^8.22.0"
   },

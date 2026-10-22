@@ -1,11 +1,11 @@
 <script setup>
 const { t, formatTime, formatDate } = useAppI18n()
-defineProps({ providers: Array, missions: Array, selectedProvider: String })
+defineProps({ providers: Array, missions: Array, selectedProvider: String, embedded: Boolean })
 defineEmits(['provider', 'claim'])
 </script>
 
 <template>
-  <section class="resources">
+  <section class="resources" :class="{ embedded }">
     <header><h2>{{ t('Provider deployment and assignments') }}</h2><span>{{ t('Capacity units are service-specific.') }}</span></header>
     <div class="provider-table" role="table" :aria-label="t('Provider capacity')">
       <div class="table-header" role="row"><span role="columnheader">{{ t('Provider') }}</span><span role="columnheader">{{ t('Service') }}</span><span role="columnheader">{{ t('Capacity') }}</span><span role="columnheader">{{ t('Availability') }}</span></div>
@@ -18,6 +18,16 @@ defineEmits(['provider', 'claim'])
 
 <style scoped>
 .resources { display: flex; flex-direction: column; background: #fff; border-top: 1px solid var(--border); }
+.resources.embedded > * { flex-shrink: 0; }
+.resources.embedded { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; border-top: 0; }
+.resources.embedded > header { flex-direction: column; align-items: flex-start; gap: 5px; padding: 16px 18px 12px; }
+.embedded .provider-table { margin: 0 12px; }
+.embedded .provider-scroll { max-height: none; overflow: visible; }
+.embedded .table-header, .embedded .provider-row { gap: 6px; padding: 10px 5px; }
+.embedded .provider-row > span:first-child { flex-direction: column; align-items: flex-start; gap: 5px; }
+.embedded .provider-row strong { font-size: 10px; }
+.embedded .provider-row > span:last-child { flex-wrap: wrap; font-size: 9px; }
+.embedded .provider-missions { padding: 12px 16px; }
 .resources > header { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 18px 21px; }.resources h2 { font-size: 13px; }.resources > header > span { color: #a0a0ab; font-size: 9px; }
 .provider-table { margin: 0 18px; }.table-header, .provider-row { display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; }.table-header { background: #f6f6f8; padding: 10px; border-radius: 6px; font-size: 9px; color: #92929e; }.provider-scroll { max-height: 205px; overflow-y: auto; }
 .table-header > span:nth-child(1), .provider-row > span:nth-child(1) { width: 28%; }.table-header > span:nth-child(2), .provider-row > span:nth-child(2) { width: 26%; }.table-header > span:nth-child(3), .provider-row > span:nth-child(3) { width: 26%; }.table-header > span:nth-child(4), .provider-row > span:nth-child(4) { flex: 1; }

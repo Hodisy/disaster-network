@@ -1,5 +1,6 @@
 import { DEMO_CONTRACT_NUMBER, DEMO_PRODUCT_NAME } from '../config/demo.js'
 import { claimStages, createReferenceClaim, demoBenefits } from './useClaimScenario.js'
+import { insurerAgentInitial, projectInsurerClaim, projectInsurerProviders, insurerServiceLabels } from './useInsurerAgent.js'
 
 const clusters = [
   { label: 'Entressen', municipality: 'Istres', count: 20, coordinates: [4.939, 43.599] },
@@ -38,7 +39,7 @@ const situationNotes = {
   ]
 }
 
-function createPortfolio() {
+export function createPortfolio() {
   const reference = { ...createReferenceClaim(), opened: false, chronology: [] }
   const places = clusters.flatMap(cluster => Array.from({ length: cluster.count }, () => cluster))
   places.splice(places.findIndex(place => place.label === reference.cluster), 1)
@@ -99,7 +100,7 @@ function createPortfolio() {
   })]
 }
 
-function createProviders() {
+export function createProviders() {
   const drying = Array.from({ length: 6 }, (_, index) => ({
     id: `dry-${index + 1}`, name: ['Delta Drying', 'Berre Drying', 'Provence Drying', 'Riviera Drying', 'West Lagoon Drying', 'Istres Drying'][index],
     skill: 'Cleaning and drying', capacity: 2, unit: 'Concurrent sites', available: true,
@@ -130,14 +131,15 @@ const collection = features => ({ type: 'FeatureCollection', features })
 export function useInsurerWorkspace() {
   const { state: client } = useDemo()
   const { t, locale } = useAppI18n()
+  const agentData = useState('insurer-agent-data', insurerAgentInitial)
   const state = useState('insurer-workspace', () => {
     const portfolio = createPortfolio()
     return { portfolio, providers: createProviders(), missions: createMissions(portfolio), overrides: {}, outage: null, planApplied: false, audit: [], pending: false, error: '', epoch: client.value.revision }
   })
   const view = ref('situation')
-  const panel = ref('priority')
+  const panel = ref('plan')
   const detailOpen = ref(false)
-  const selectedId = ref('CAT-2026-001')
+  const selectedId = ref(null)
   const page = ref(1)
   const query = reactive({ search: '', municipality: '', priority: '', need: '', stage: '', group: '', access: '' })
 
@@ -145,13 +147,13 @@ export function useInsurerWorkspace() {
     if (state.value.epoch === revision) return
     const portfolio = createPortfolio()
     state.value = { portfolio, providers: createProviders(), missions: createMissions(portfolio), overrides: {}, outage: null, planApplied: false, audit: [], pending: false, error: '', epoch: revision }
-    selectedId.value = 'CAT-2026-001'
+    selectedId.value = null
     detailOpen.value = false
   }, { immediate: true })
 
-  const claims = computed(() => state.value.portfolio.map(record => {
-    const shared = record.id === 'CAT-2026-001' && client.value.claim ? client.value.claim : null
-    const claim = { ...record, ...shared, ...(state.value.overrides[record.id] || {}) }
+  const claims = computed(() => (agentData.value.live ? agentData.value.claims.map(projectInsurerClaim) : state.value.portfolio).map(record => {
+    const shared = !agentData.value.live && record.id === 'CAT-2026-001' && client.value.claim ? client.value.claim : null
+    const claim = { ...record, ...shared, ...(!agentData.value.live ? state.value.overrides[record.id] || {} : {}) }
     const money = claim.moneyLines
     return {
       ...claim, stageLabel: claimStages[claim.stage],
@@ -183,13 +185,18 @@ export function useInsurerWorkspace() {
   watch(pageCount, count => { page.value = Math.min(page.value, count) })
   watch(filtered, records => { if (selectedId.value && !records.some(claim => claim.id === selectedId.value)) { selectedId.value = null; detailOpen.value = false } })
 
-  const missions = computed(() => state.value.missions.map(mission => {
+  const missions = computed(() => agentData.value.live ? agentData.value.assignments.map(a => ({
+    id: a.id, claimId: agentData.value.claims.find(c => c.id === a.claim_id)?.reference, providerId: a.provider_id,
+    skill: insurerServiceLabels[a.service_type], status: a.service_type !== 'accommodation' && claims.value.find(c => c.databaseId === a.claim_id)?.access !== 'Permitted' ? 'Blocked' : a.status === 'proposed' ? 'Proposed' : a.status === 'completed_in_demo' ? 'Completed' : 'Scheduled',
+    start: a.starts_at, end: a.ends_at, estimate: a.estimated_cost_cents / 100,
+    claim: claims.value.find(c => c.databaseId === a.claim_id), provider: projectInsurerProviders(agentData.value).find(p => p.id === a.provider_id)
+  })).filter(mission => mission.claim) : state.value.missions.map(mission => {
     const claim = claims.value.find(item => item.id === mission.claimId)
     const provider = state.value.providers.find(item => item.id === mission.providerId)
     const status = claim.access !== 'Permitted' && mission.skill !== 'Temporary accommodation' ? 'Blocked' : mission.status === 'Blocked' ? 'Proposed' : mission.status
     return { ...mission, status, claim, provider }
   }))
-  const providers = computed(() => state.value.providers.map(provider => {
+  const providers = computed(() => agentData.value.live ? projectInsurerProviders(agentData.value) : state.value.providers.map(provider => {
     const assigned = missions.value.filter(mission => mission.providerId === provider.id && mission.status === 'Scheduled').length
     const placements = provider.skill === 'Temporary accommodation' ? claims.value.filter(claim => claim.accommodationPlaced).length : 0
     const used = assigned + placements
@@ -218,6 +225,7 @@ export function useInsurerWorkspace() {
   const assignmentGeojson = computed(() => collection(view.value === 'mobilization' ? missions.value.filter(mission => mission.provider && ['Scheduled', 'Disrupted'].includes(mission.status)).map(mission => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: [mission.provider.coordinates, mission.claim.coordinates] }, properties: { disrupted: mission.status === 'Disrupted' } })) : []))
 
   const replan = computed(() => {
+    if (agentData.value.live) return null
     if (!state.value.outage || state.value.planApplied) return null
     const affected = missions.value.filter(mission => mission.providerId === state.value.outage && mission.status === 'Disrupted')
     const reservations = new Map()
@@ -235,13 +243,20 @@ export function useInsurerWorkspace() {
       canApply: changes.length > 0 && changes.every(change => change.replacement),
       maxDelay: Math.max(0, ...changes.map(change => change.delayHours || 0)), costDelta: changes.reduce((sum, change) => sum + (change.costDelta || 0), 0) }
   })
-  const proposedGeojson = computed(() => collection(replan.value ? replan.value.changes.filter(change => change.replacement).map(change => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: [change.replacement.coordinates, change.mission.claim.coordinates] }, properties: {} })) : []))
+  const proposedGeojson = computed(() => {
+    if (agentData.value.live) {
+      const pending = agentData.value.proposals[selectedId.value]
+      return collection(pending && !pending.decision && !pending.stale && selected.value ? pending.data.proposal.operations.filter(op => op.eligible).map(op => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: [op.coordinates, selected.value.coordinates] }, properties: {} })) : [])
+    }
+    return collection(replan.value ? replan.value.changes.filter(change => change.replacement).map(change => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: [change.replacement.coordinates, change.mission.claim.coordinates] }, properties: {} })) : [])
+  })
 
   function selectClaim(id, open = false) { selectedId.value = id; detailOpen.value = open; state.value.error = '' }
   function updateFilter(key, value) { if (Object.hasOwn(query, key)) query[key] = value }
   function clearFilters() { Object.keys(query).forEach(key => { query[key] = '' }) }
   function log(label, claimId) { state.value.audit.push({ label, claimId, at: new Date().toISOString() }) }
   async function simulate(action) {
+    if (agentData.value.live) return
     if (state.value.pending) return
     const epoch = client.value.revision
     state.value.pending = true
@@ -322,6 +337,7 @@ export function useInsurerWorkspace() {
     })
   }
   function planAssistance() {
+    if (agentData.value.live) return
     view.value = 'mobilization'
     detailOpen.value = true
     const claim = selected.value

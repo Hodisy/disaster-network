@@ -1,7 +1,8 @@
 import { createHash, randomUUID } from 'node:crypto'
 import * as claims from '../../repositories/hotlineClaims.js'
 import { readIncidentContext } from '../../repositories/incidentContext.js'
-import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, DEMO_CONTRACT_NUMBER, normalizeContractNumber } from '../../../app/config/demo.js'
+import { checkOfficialSource, readClaimEvidence } from './evidence.js'
+import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID } from '../../../app/config/demo.js'
 
 export const NEEDS = ['accommodation', 'essential_items', 'electrical_safety', 'cleaning_drying', 'moving_storage', 'contents', 'building']
 const string = { type: 'string' }
@@ -15,6 +16,8 @@ export const hotlineTools = [
   tool('get_policy', 'Read actual fictional policy terms, limits and document_sections source references from PostgreSQL. Never infer eligibility.'),
   tool('get_claim', 'Read the verified reserved claim. No duplicate claim creation.'),
   tool('get_incident_context', 'Read the fixed dated scenario context. No weather service or live research.'),
+  tool('get_claim_evidence', 'Read genuinely stored supporting-document metadata and existing AI extraction results. Photos do not prove cause, date, authenticity or coverage. Never claim an unanalysed file was read.'),
+  tool('check_official_catnat', 'Consult the public Georisques GASPAR API for the insured municipality and event date. Return sourced dated matches, no match, incomplete or unavailable. Never infer coverage or official recognition from absence. No general web search.'),
   tool('prepare_report', 'Prepare a report and assistance/document requests for browser review. Does NOT persist or book anything. Collect user facts, do not invent missing details. Unknown is allowed.', {
     description: string, safe: enumeration(['yes', 'no', 'unknown']), household_size: { type: 'integer', minimum: 1, maximum: 20 },
     habitability: enumeration(['habitable', 'uninhabitable', 'unknown']), access: enumeration(['unknown', 'restricted']),
@@ -59,15 +62,16 @@ export async function saveDraft(session, config) {
   const result = await claims.commitReport(config, draft, draft.id, session.conversationId, session.locale)
   session.saved = true
   session.claimGrantUntil = Date.now() + 30 * 60 * 1000
+  session.evidenceGrantUntil = session.claimGrantUntil
   session.claim = result.claim
-  return { saved: true, claim_reference: DEMO_CLAIM_REFERENCE, replayed: result.replayed, fictional: true }
+  return { saved: true, claim_reference: result.claim.reference, replayed: result.replayed, fictional: true }
 }
 export async function runTool(session, config, name, raw) {
   const args = argsFor(name, raw)
   if (session.closed || session.closing) fail('SESSION_CLOSED')
   if (name === 'find_demo_customer') {
-    if (args.first_name.trim().toLowerCase() !== 'jules' || normalizeContractNumber(args.contract_number) !== DEMO_CONTRACT_NUMBER) return { found: false }
     const challenge = await claims.verificationQuestion(config, args.first_name, args.contract_number)
+    if (!challenge) return { found: false }
     session.challengeIssued = true
     return { found: true, ...challenge }
   }
@@ -77,20 +81,25 @@ export async function runTool(session, config, name, raw) {
     session.verificationAttempts += 1
     const result = await claims.verifyCustomer(config, args.answer)
     if (result.verified) session.verifiedUntil = Math.min(session.expiresAt, Date.now() + 20 * 60 * 1000)
-    else { session.verifiedUntil = 0; session.claimGrantUntil = 0; session.approvedDraft = null }
+    else { session.verifiedUntil = 0; session.claimGrantUntil = 0; session.evidenceGrantUntil = 0; session.approvedDraft = null }
     return result
   }
   if (name === 'get_incident_context') return readIncidentContext()
   assertVerified(session)
   if (name === 'get_customer') return claims.readCustomer(config)
   if (name === 'get_policy') return claims.readPolicy(config)
+  if (name === 'get_claim_evidence') return readClaimEvidence(config)
+  if (name === 'check_official_catnat') return checkOfficialSource(config)
   if (name === 'get_claim') {
     const claim = await claims.readClaim(config)
-    if (claim.intake_status === 'reported') session.claimGrantUntil = Date.now() + 30 * 60 * 1000
+    if (claim.intake_status === 'reported') {
+      session.claimGrantUntil = Date.now() + 30 * 60 * 1000
+      session.evidenceGrantUntil = session.claimGrantUntil
+    }
     return claim
   }
   if (name === 'prepare_report') {
-    const dateValid = value => value === '' || /^2026-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value
+    const dateValid = value => value === '' || /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value
     if (!args.description.trim() || !dateValid(args.accommodation_start) || args.accommodation_needed !== args.needs.includes('accommodation')) fail('INVALID_TOOL_ARGUMENTS')
     const current = await claims.readClaim(config)
     const policy = await claims.readPolicy(config)
@@ -120,6 +129,6 @@ export async function runTool(session, config, name, raw) {
 }
 export function newHarnessContext(locale) {
   return { conversationId: randomUUID(), locale, verificationAttempts: 0, verifiedUntil: 0, challengeIssued: false,
-    draft: null, approvedDraft: null, saved: false, claimGrantUntil: 0, claim: null,
+    draft: null, approvedDraft: null, saved: false, claimGrantUntil: 0, evidenceGrantUntil: 0, claim: null,
     customerId: DEMO_CUSTOMER_ID, policyId: DEMO_POLICY_ID, claimId: DEMO_CLAIM_ID }
 }

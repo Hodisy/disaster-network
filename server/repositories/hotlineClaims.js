@@ -1,15 +1,16 @@
 import { Client } from 'pg'
-import { scrypt, timingSafeEqual, randomUUID } from 'node:crypto'
+import { scrypt, timingSafeEqual, randomUUID, createHash } from 'node:crypto'
 import { promisify } from 'node:util'
 import { connectionOptions } from './demoDatabase.js'
-import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, DEMO_CONTRACT_NUMBER, normalizeContractNumber } from '../../app/config/demo.js'
+import { DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID, DEMO_CLAIM_REFERENCE, normalizeContractNumber } from '../../app/config/demo.js'
 import { DEMO_LOCK_NAME, DEMO_SCHEMA_MARKER } from '../../database/operations.js'
+import { policyPdfProjection, policyDocumentHash } from '../utils/policyPdfReferences.js'
 
 const deriveKey = promisify(scrypt)
 const fail = code => Object.assign(new Error(code), { code })
 
 // Every operation shares the maintenance lock, so reset cannot interleave a write.
-async function transaction(config, work) {
+export async function transaction(config, work) {
   const client = new Client({ ...await connectionOptions(config), application_name: 'disaster-network-hotline' })
   try {
     await client.connect()
@@ -22,19 +23,30 @@ async function transaction(config, work) {
     return result
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {})
-    const known = ['DEMO_SCHEMA_MISSING', 'DEMO_RECORD_MISSING', 'CLAIM_CLOSED', 'DRAFT_STALE']
+    const known = ['DEMO_SCHEMA_MISSING', 'DEMO_RECORD_MISSING', 'CLAIM_CLOSED', 'DRAFT_STALE', 'DOCUMENT_NOT_FOUND', 'DOCUMENT_LIMIT_REACHED', 'DOCUMENT_ANALYSIS_BUSY', 'INSURER_RECORD_MISSING', 'PROPOSAL_STALE', 'PROPOSAL_ALREADY_REVIEWED', 'PROVIDER_CAPACITY_CHANGED', 'POLICY_PDF_UNAVAILABLE', 'INVALID_PROPOSAL']
     throw fail(known.includes(error.code) ? error.code : 'DATABASE_UNAVAILABLE')
   } finally { await client.end().catch(() => {}) }
 }
 
-export function verificationQuestion(config, firstName = 'Jules', contractNumber = DEMO_CONTRACT_NUMBER) {
+// Preflight checks only the configured record scope, without supplying identity facts to a model.
+export function assertHotlineReady(config) {
+  return transaction(config, async db => {
+    const { rows } = await db.query(`SELECT c.id FROM disaster_demo.customers c
+      JOIN disaster_demo.policies p ON p.customer_id = c.id
+      JOIN disaster_demo.claims cl ON cl.policy_id = p.id
+      WHERE c.id = $1 AND p.id = $2 AND cl.id = $3 AND c.verification_question IS NOT NULL`,
+    [DEMO_CUSTOMER_ID, DEMO_POLICY_ID, DEMO_CLAIM_ID])
+    if (!rows[0]) throw fail('DEMO_RECORD_MISSING')
+  })
+}
+
+export function verificationQuestion(config, firstName, contractNumber) {
   return transaction(config, async db => {
     const { rows } = await db.query(`SELECT c.verification_question FROM disaster_demo.customers c
       JOIN disaster_demo.policies p ON p.customer_id = c.id
       WHERE c.id = $1 AND p.id = $2 AND lower(c.first_name) = lower($3) AND regexp_replace(p.contract_number, '[[:space:]-]', '', 'g') = $4`,
     [DEMO_CUSTOMER_ID, DEMO_POLICY_ID, firstName.trim(), normalizeContractNumber(contractNumber)])
-    if (!rows[0]) throw fail('DEMO_RECORD_MISSING')
-    return { question: rows[0].verification_question, fictional: true }
+    return rows[0] ? { question: rows[0].verification_question, fictional: true } : null
   })
 }
 
@@ -60,7 +72,7 @@ export function readCustomer(config) {
 export function readPolicy(config) {
   return transaction(config, async db => {
     const { rows } = await db.query(`SELECT id, customer_id, contract_number, version, product_name, valid_from::text,
-      valid_to::text, address, city, property_type, occupancy, coverage_data, general_terms_document_id, specific_terms_document_id
+      valid_to::text, address, city, insee_code, property_type, occupancy, coverage_data, general_terms_document_id, specific_terms_document_id
       FROM disaster_demo.policies WHERE id = $1 AND customer_id = $2`, [DEMO_POLICY_ID, DEMO_CUSTOMER_ID])
     if (!rows[0]) throw fail('DEMO_RECORD_MISSING')
     const policy = rows[0]
@@ -69,7 +81,23 @@ export function readPolicy(config) {
       JOIN disaster_demo.documents d ON d.id = s.document_id WHERE s.document_id = ANY($1::uuid[]) ORDER BY s.document_id, s.position`,
     [[policy.general_terms_document_id, policy.specific_terms_document_id]])
     if (!sections.rows.length) throw fail('DEMO_RECORD_MISSING')
-    return { ...policy, sections: sections.rows }
+    // PDF exports place the schedule on page one, then up to three clauses per page.
+    const projection = policyPdfProjection(policy, sections.rows)
+    const pdf = await db.query(`SELECT d.id, d.filename, d.sha256, d.size_bytes FROM disaster_demo.claim_events e
+      JOIN disaster_demo.documents d ON d.id::text = e.data->>'document_id'
+      WHERE e.claim_id = $1 AND e.type = 'policy_pdf_stored' AND e.data->>'source_hash' = $2 AND e.data->>'sha256' = d.sha256 AND d.mime_type = 'application/pdf'
+      ORDER BY e.created_at DESC LIMIT 1`, [DEMO_CLAIM_ID, policyDocumentHash(projection)])
+    return { ...projection, stored_pdf: pdf.rows[0] || null }
+  })
+}
+export async function readPolicyPdf(config) {
+  const policy = await readPolicy(config)
+  if (!policy.stored_pdf) throw fail('POLICY_PDF_UNAVAILABLE')
+  return transaction(config, async db => {
+    const { rows } = await db.query('SELECT filename, content, mime_type, sha256 FROM disaster_demo.documents WHERE id = $1 AND sha256 = $2', [policy.stored_pdf.id, policy.stored_pdf.sha256])
+    if (!rows[0]) throw fail('POLICY_PDF_UNAVAILABLE')
+    if (createHash('sha256').update(rows[0].content).digest('hex') !== rows[0].sha256) throw fail('POLICY_PDF_UNAVAILABLE')
+    return rows[0]
   })
 }
 
@@ -107,7 +135,7 @@ export function commitReport(config, draft, operationId, conversationId, languag
     // Access can remain unknown or become restricted from intake; a voice call never authorizes site access.
     const access = draft.access === 'restricted' ? 'restricted' : current.access_status
     await db.query(`UPDATE disaster_demo.claims SET intake_status = 'reported',
-      reported_at = COALESCE(reported_at, '2026-10-22T10:00:00+02:00'::timestamptz),
+      reported_at = COALESCE(reported_at, now()),
       description = $2, summary = $2, habitability = $3, access_status = $4,
       needs = $5::jsonb, required_documents = $6::jsonb, priority = $7,
       priority_reasons = $8::jsonb, updated_at = now() WHERE id = $1`,

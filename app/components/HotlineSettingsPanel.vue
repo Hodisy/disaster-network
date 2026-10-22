@@ -13,6 +13,7 @@ defineEmits(['update:mode', 'update:accessKey', 'unlock'])
       <button :aria-pressed="mode === 'mock'" @click="$emit('update:mode', 'mock')">{{ t('Scripted conversation · Microphone off') }}</button>
     </div>
     <p>{{ t('Your voice is sent to OpenAI during the call. The assistant is AI; Allstorm and all insurance outcomes are fictional.') }}</p>
+    <p>{{ t('In the verified Live dossier, photos and PDFs are saved in PostgreSQL. AI reading sends a selected file to OpenAI only after your agreement. Scripted previews remain local.') }}</p>
     <p v-if="authorized" class="access-ready" role="status"><UiIcon name="CircleCheck" :size="16" />{{ t('Voice access is unlocked for this browser.') }}</p>
     <form v-else @submit.prevent="$emit('unlock')">
       <label for="voice-access-key">{{ t('Workspace access key') }}</label>

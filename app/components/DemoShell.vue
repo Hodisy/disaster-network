@@ -15,7 +15,7 @@ function closeOverlays() {
 </script>
 
 <template>
-  <div class="app-shell" @keydown.esc="closeOverlays">
+  <div class="app-shell" :class="{ 'operations-shell': active === 'insurer' }" @keydown.esc="closeOverlays">
     <a class="skip-link" href="#main-content">{{ t('Skip to content') }}</a>
     <aside class="sidebar">
       <NuxtLink to="/hotline" class="brand" :aria-label="t('Disaster Network, hotline home')">Disaster Network<span class="brand-period">.</span></NuxtLink>
@@ -46,6 +46,9 @@ function closeOverlays() {
 
 <style scoped>
 .app-shell { display: flex; min-height: 100%; }
+.operations-shell { height: 100%; min-height: 0; overflow: hidden; }
+.operations-shell .workspace { min-height: 0; }
+.operations-shell main { display: flex; flex-direction: column; overflow: hidden; }
 .skip-link { position: fixed; top: -70px; left: 16px; z-index: 100; padding: 12px; border-radius: 8px; background: var(--ink); color: white; }
 .skip-link:focus { top: 12px; }
 .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px 14px 14px; }

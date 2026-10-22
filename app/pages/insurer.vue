@@ -1,24 +1,52 @@
 <script setup>
 const { t, formatDate, formatMoney } = useAppI18n()
-const { documentRows, state: clientClaimState } = useDemo()
-const { refreshLiveClaim, claimError } = useHotlineClaim()
-onMounted(() => { void refreshLiveClaim({ quiet: true }) })
-const { state, view, panel, detailOpen, selectedId, selected, query, page, pageCount, pageClaims, filtered, queue, providers, missions, selectedMissions, stats, options, replan,
+const { documentRows } = useDemo()
+const { data: agentData, busy: agentBusy, error: agentError, restore: restoreAgent, refresh: refreshAgent, loadProposal, analyze: analyzeAgent, review: reviewAgent, downloadPolicy } = useInsurerAgent()
+// Every visit starts in the local scenario. Database loading and AI analysis are explicit actions.
+agentData.value.live = false
+const { state, view, panel, detailOpen, selectedId, selected, query, page, pageCount, pageClaims, claims, filtered, queue, providers, missions, selectedMissions, stats, options, replan,
   claimGeojson, providerGeojson, assignmentGeojson, proposedGeojson, selectClaim, updateFilter, clearFilters, simulateOutage, applyPlan, cancelOutage, permitAccess, placeAccommodation, scheduleSelected, planAssistance } = useInsurerWorkspace()
+const { summary, services } = useInsurerOperationsSummary({ claims, providers, missions, stats })
+const connectingWorkspace = ref(false)
+const workspaceNotice = ref('')
 const advanced = ref(false)
-const popupOpen = ref(true)
+const popupOpen = ref(false)
 const reportOpen = ref(false)
 const replanOpen = ref(false)
 const selectedProvider = ref('')
+const agentOpen = ref(false), agentReference = ref(''), agentConsent = ref(false), humanReviewed = ref(false), humanNote = ref('')
+const agentProposal = computed(() => agentData.value.proposals[agentReference.value] || null)
+watch(() => agentProposal.value?.id, () => { humanReviewed.value = false; humanNote.value = '' })
+async function openAgent() { if (!selectedId.value) return; agentReference.value = selectedId.value; agentOpen.value = true; agentConsent.value = false; await loadProposal(agentReference.value) }
+async function applyAgentDecision(decision) { await reviewAgent(agentReference.value, agentProposal.value.id, decision, humanNote.value, humanReviewed.value); view.value = 'mobilization' }
 const selectedAudit = computed(() => state.value.audit.filter(entry => entry.claimId === selectedId.value))
 function openClaim(id) { selectClaim(id, true); panel.value = 'claims'; replanOpen.value = false; popupOpen.value = false }
 function selectOnMap(id) { selectClaim(id); popupOpen.value = true }
-function showPanel(value) { panel.value = value; detailOpen.value = false; replanOpen.value = false }
-function selectProvider(id) { selectedProvider.value = id; view.value = 'mobilization' }
+function showPanel(value) {
+  panel.value = value; detailOpen.value = false; replanOpen.value = false; popupOpen.value = false
+  if (value === 'resources') view.value = 'mobilization'
+  if (value === 'plan' || value === 'resources') selectClaim(null)
+}
+function showResources() { view.value = 'mobilization'; showPanel('resources') }
+function changeView(value) { view.value = value; showPanel(value === 'mobilization' ? 'resources' : 'plan') }
+function reviewService(skill) { updateFilter('need', skill); showPanel('claims') }
+async function connectAgentWorkspace() {
+  if (agentBusy.value || connectingWorkspace.value) return
+  connectingWorkspace.value = true; workspaceNotice.value = ''
+  try {
+    await restoreAgent()
+    if (!agentData.value.authorized) workspaceNotice.value = 'Unlock insurer access in Settings to continue.'
+  } finally { connectingWorkspace.value = false }
+}
+watch(() => agentData.value.live, () => {
+  selectClaim(null); detailOpen.value = false; popupOpen.value = false
+  panel.value = 'plan'; replanOpen.value = false; selectedProvider.value = ''; clearFilters()
+})
+function selectProvider(id) { selectedProvider.value = id; showResources() }
 async function outage() { await simulateOutage(); replanOpen.value = !!replan.value }
 async function approveReplan() { await applyPlan(); if (state.value.planApplied) replanOpen.value = false }
 async function resetResources() { await cancelOutage(); replanOpen.value = false; selectedProvider.value = '' }
-watch(() => state.value.epoch, () => { replanOpen.value = false; popupOpen.value = true; selectedProvider.value = '' })
+watch(() => state.value.epoch, () => { replanOpen.value = false; popupOpen.value = false; panel.value = 'plan'; selectedProvider.value = '' })
 const reportText = computed(() => [
   t('Disaster Network — Situation report'),
   `${t('Scenario snapshot')}: ${formatDate('2026-10-22')}`,
@@ -36,7 +64,9 @@ const reportText = computed(() => [
   t('Confirm accommodation needs; review access before scheduling physical work; use qualified available providers.'),
   t('The contractual flood cover is reviewed separately from statutory CatNat recognition, which remains unverified.'),
   t('Gross estimates are not reserves, approved amounts, or measured savings.'), '',
-  ...state.value.audit.map(entry => t(entry.label))
+  ...state.value.audit.map(entry => t(entry.label)),
+  ...(agentData.value.live ? [t('AI classification and human decisions'),
+    ...agentData.value.claims.filter(c => c.assessment.status === 'human_reviewed_proposal').map(c => `${c.reference} · ${c.assessment.group} / ${c.priority} · ${c.assessment.summary} · ${t('Evidenced reimbursement proposal')}: ${c.assessment.reimbursement_proposal_cents == null ? t('Unknown') : formatMoney(c.assessment.reimbursement_proposal_cents / 100)} · ${t('No payment executed')}`)] : [])
 ].join('\n'))
 function downloadReport() {
   const url = URL.createObjectURL(new Blob([reportText.value], { type: 'text/plain;charset=utf-8' }))
@@ -51,43 +81,59 @@ useHead(() => ({ title: t('Insurer workspace — Disaster Network') }))
 
 <template>
   <div class="insurer-page">
-    <p v-if="clientClaimState.claim?.source === 'postgresql'" class="live-report-source">{{ t('Jules’s report is saved. The portfolio view includes his existing claim.') }}</p>
-    <p v-if="clientClaimState.claim?.source === 'postgresql' && claimError" class="live-report-source" role="alert">{{ t(hotlineErrorPhrase(claimError)) }}</p>
     <header class="operations-heading">
       <div><h1>{{ t('Berre Lagoon flood response') }}</h1><p>{{ t('Event: {date}', { date: formatDate('2026-10-20', { month: 'short' }) }) }}<span>·</span>{{ t('Scenario snapshot: {date}', { date: formatDate('2026-10-22', { month: 'short' }) }) }}</p></div>
-      <div class="heading-actions"><span class="demo-data">{{ t('Portfolio snapshot') }}</span><UiButton v-if="view === 'mobilization' && !state.outage" class="small" :disabled="state.pending" @click="outage"><UiIcon name="TriangleAlert" :size="14" />{{ t('Preview provider outage') }}</UiButton><UiButton v-else-if="state.outage" class="small" :disabled="state.pending" @click="resetResources">{{ t('Restore resource plan') }}</UiButton><UiButton class="dark" @click="reportOpen = true"><UiIcon name="FileText" :size="15" />{{ t('Situation report') }}</UiButton></div>
+      <div class="heading-actions"><span class="demo-data">{{ t('Portfolio snapshot') }}</span><UiButton v-if="!agentData.live && view === 'mobilization' && !state.outage" class="small" :disabled="state.pending" @click="outage"><UiIcon name="TriangleAlert" :size="14" />{{ t('Preview provider outage') }}</UiButton><UiButton v-else-if="!agentData.live && state.outage" class="small" :disabled="state.pending" @click="resetResources">{{ t('Restore resource plan') }}</UiButton><UiButton class="dark" @click="reportOpen = true"><UiIcon name="FileText" :size="15" />{{ t('Situation report') }}</UiButton></div>
     </header>
-    <div class="portfolio-summary"><span><strong>{{ stats.households }}</strong>{{ t('Portfolio households') }}</span><span><strong>{{ stats.people }}</strong>{{ t('People in households') }}</span><span><strong>{{ stats.opened }}</strong>{{ t('Opened reports') }}</span><span class="summary-amount"><strong>{{ formatMoney(stats.gross) }}</strong>{{ t('Known gross estimates') }}<small>{{ t('Partial · Not approved') }}</small></span></div>
-    <InsurerToolbar :view="view" :query="query" :options="options" :advanced="advanced" @view="view = $event" @filter="updateFilter" @advanced="advanced = !advanced" @clear="clearFilters" />
+    <InsurerOperationsSummary :summary="summary" @priority="showPanel('priority')" @resources="showResources" />
+    <div class="agent-controls">
+      <span>{{ t(agentData.live ? 'AI-assisted review · Proposals require approval' : 'Operations overview · Needs, costs and deployment') }}</span>
+      <button v-if="!agentData.live" :disabled="!!agentBusy || connectingWorkspace" @click="connectAgentWorkspace">{{ t(connectingWorkspace ? 'Loading dossiers…' : 'Use AI-assisted review') }}</button>
+      <template v-else><button @click="agentData.live = false">{{ t('Return to operations overview') }}</button><button :disabled="!!agentBusy" @click="refreshAgent">{{ t('Refresh') }}</button></template>
+      <NuxtLink v-if="!agentData.authorized" to="/settings">{{ t('Unlock insurer agent in Settings') }}</NuxtLink>
+      <UiButton class="dark small" :disabled="!agentData.live || !selectedId || !!agentBusy" :title="t('Select a dossier to request an AI proposal')" @click="openAgent">{{ t('Review with AI') }}</UiButton>
+    </div>
+    <p v-if="workspaceNotice && !agentData.live" class="workspace-notice" role="status">{{ t(workspaceNotice) }}</p>
+    <p v-if="agentError && !agentOpen" class="operation-error" role="alert">{{ t(agentError) }}</p>
+    <InsurerToolbar :view="view" :query="query" :options="options" :advanced="advanced" @view="changeView" @filter="updateFilter" @advanced="advanced = !advanced" @clear="clearFilters" />
     <div v-if="state.error" class="operation-error" role="alert">{{ t(state.error) }}</div>
-    <div v-if="state.outage" class="operation-notice" :class="{ applied: state.planApplied }" role="status"><UiIcon :name="state.planApplied ? 'CircleCheck' : 'TriangleAlert'" :size="15" /><span>{{ t(state.planApplied ? 'Replacement plan updated. Review provider availability before dispatch.' : 'A drying provider is unavailable. Review the affected missions before applying a replacement.') }}</span><button v-if="!state.planApplied" @click="replanOpen = true; view = 'mobilization'">{{ t('Review replanning') }}<UiIcon name="ChevronRight" :size="13" /></button></div>
+    <div v-if="!agentData.live && state.outage" class="operation-notice" :class="{ applied: state.planApplied }" role="status"><UiIcon :name="state.planApplied ? 'CircleCheck' : 'TriangleAlert'" :size="15" /><span>{{ t(state.planApplied ? 'Replacement plan updated. Review provider availability before dispatch.' : 'A drying provider is unavailable. Review the affected missions before applying a replacement.') }}</span><button v-if="!state.planApplied" @click="replanOpen = true; view = 'mobilization'">{{ t('Review replanning') }}<UiIcon name="ChevronRight" :size="13" /></button></div>
     <div class="operations-body" :class="{ mobilization: view === 'mobilization' }">
       <div class="map-column">
-        <InsurerMap :claims="claimGeojson" :providers="providerGeojson" :assignments="assignmentGeojson" :proposed="proposedGeojson" :selected="selected" :show-popup="popupOpen && !detailOpen" :stats="stats" @select="selectOnMap" @open="openClaim" @provider="selectProvider" @dismiss-popup="popupOpen = false" />
-        <InsurerResources v-if="view === 'mobilization'" :providers="providers" :missions="missions" :selected-provider="selectedProvider" @provider="selectProvider" @claim="openClaim" />
+        <InsurerMap fit :claims="claimGeojson" :providers="providerGeojson" :assignments="assignmentGeojson" :proposed="proposedGeojson" :selected="selected" :show-popup="popupOpen && !detailOpen" :stats="stats" @select="selectOnMap" @open="openClaim" @provider="selectProvider" @dismiss-popup="popupOpen = false" />
       </div>
       <aside class="operations-panel" :aria-label="t('Claim workspace')">
-        <div class="panel-tabs" role="tablist" :aria-label="t('Right panel view')"><button id="priority-tab" role="tab" :aria-selected="panel === 'priority'" aria-controls="claim-panel" :class="{ active: panel === 'priority' }" @click="showPanel('priority')">{{ t('Priority queue') }}</button><button id="claims-tab" role="tab" :aria-selected="panel === 'claims'" aria-controls="claim-panel" :class="{ active: panel === 'claims' }" @click="showPanel('claims')">{{ t('All claims') }}</button></div>
-        <div id="claim-panel" class="panel-content" role="tabpanel" :aria-labelledby="panel === 'priority' ? 'priority-tab' : 'claims-tab'">
-          <InsurerReplanPreview v-if="replanOpen && replan" :plan="replan" :pending="state.pending" :blocked="stats.blocked" @apply="approveReplan" @close="replanOpen = false" @claim="openClaim" />
-          <InsurerClaimDetail v-else-if="detailOpen && selected" :claim="selected" :missions="selectedMissions" :audit="selectedAudit" :pending="state.pending" :client-documents="documentRows" @back="showPanel('claims')" @plan="planAssistance" @permit-access="permitAccess" @accommodate="placeAccommodation" @schedule="scheduleSelected" @client="navigateTo('/client')" />
+        <div class="panel-tabs" role="tablist" :aria-label="t('Right panel view')">
+          <button v-for="tab in [{ id: 'plan', label: 'Response plan' }, { id: 'resources', label: 'Providers' }, { id: 'priority', label: 'Priority queue' }, { id: 'claims', label: 'All claims' }]" :id="`${tab.id}-tab`" :key="tab.id" role="tab" :aria-selected="panel === tab.id" aria-controls="claim-panel" :class="{ active: panel === tab.id }" @click="showPanel(tab.id)">{{ t(tab.label) }}</button>
+        </div>
+        <div id="claim-panel" class="panel-content" role="tabpanel" :aria-labelledby="`${panel}-tab`">
+          <InsurerReplanPreview v-if="!agentData.live && replanOpen && replan" :plan="replan" :pending="state.pending" :blocked="stats.blocked" @apply="approveReplan" @close="replanOpen = false" @claim="openClaim" />
+          <InsurerClaimDetail v-else-if="detailOpen && selected" :claim="selected" :missions="selectedMissions" :audit="selectedAudit" :pending="state.pending || agentData.live" :agent-mode="agentData.live" :client-documents="documentRows" @back="showPanel('claims')" @plan="planAssistance" @permit-access="permitAccess" @accommodate="placeAccommodation" @schedule="scheduleSelected" @client="navigateTo('/client')" />
+          <InsurerResponsePlan v-else-if="panel === 'plan'" :services="services" :live="agentData.live" @service="reviewService" @resources="showResources" />
+          <InsurerResources v-else-if="panel === 'resources'" embedded :providers="providers" :missions="missions" :selected-provider="selectedProvider" @provider="selectProvider" @claim="openClaim" />
           <InsurerClaimList v-else :mode="panel" :claims="panel === 'priority' ? queue : pageClaims" :total="panel === 'priority' ? queue.length : filtered.length" :selected-id="selectedId" :page="page" :page-count="pageCount" @select="openClaim" @page="page = $event" @clear="clearFilters" />
         </div>
       </aside>
     </div>
-    <p class="live-report-source">{{ t('Evaluation workspace · Fictional records and providers. Actions do not dispatch services.') }}</p>
+    <UiDialog v-if="agentOpen" :title="t('AI decision proposal')" wide @close="agentOpen = false"><InsurerAgentPanel :reference="agentReference" :proposal="agentProposal" :busy="agentBusy" :error="agentError" v-model:consent="agentConsent" v-model:reviewed="humanReviewed" v-model:note="humanNote" @analyze="analyzeAgent(agentReference, agentConsent)" @approve="applyAgentDecision('approve')" @reject="applyAgentDecision('reject')" @download="downloadPolicy(agentReference)" @document="(id, name) => downloadPolicy(agentReference, id, name)" /></UiDialog>
     <UiDialog v-if="reportOpen" :title="t('Disaster Network — Situation report')" wide @close="reportOpen = false"><div class="report-body"><span class="report-label">{{ t('Portfolio situation report') }}</span><p>{{ t('This snapshot uses the entire portfolio, independently of current map filters.') }}</p><pre>{{ reportText }}</pre><UiButton class="dark" @click="downloadReport"><UiIcon name="Download" :size="15" />{{ t('Download report') }}</UiButton></div></UiDialog>
   </div>
 </template>
 
 <style scoped>
-.live-report-source { padding: 10px 24px; color: #777781; font-size: 11px; line-height: 1.6; border-bottom: 1px solid #e8e8ed; }
-.insurer-page { display: flex; flex-direction: column; min-width: 1050px; background: #fff; }
-.operations-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 27px 24px 23px; }.operations-heading h1 { font-size: 27px; letter-spacing: -0.9px; line-height: 35px; }.operations-heading p { display: flex; align-items: center; gap: 10px; margin-top: 7px; color: #9696a2; font-size: 11px; }.operations-heading p > span { color: #bcbcc4; }
+.agent-controls { display: flex; align-items: center; gap: 14px; padding: 8px 24px; min-height: 39px; border-bottom: 1px solid #e7e7ed; font-size: 11px; }
+.workspace-notice { padding: 7px 24px; font-size: 10px; line-height: 16px; color: #8c713f; background: #fff9ec; border-bottom: 1px solid #f1e6d0; }
+.agent-controls > span { flex: 1; color: #858590; }
+.agent-controls > button, .agent-controls > a { font-size: 10px; text-decoration: underline; }
+.live-report-source { padding: 5px 24px; color: #777781; font-size: 9px; line-height: 14px; border-bottom: 1px solid #e8e8ed; }
+.insurer-page { display: flex; flex: 1; flex-direction: column; min-width: 1050px; min-height: 0; overflow: hidden; background: #fff; }
+.insurer-page > :not(.operations-body) { flex-shrink: 0; }
+.operations-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 24px 14px; }.operations-heading h1 { font-size: 24px; letter-spacing: -0.7px; line-height: 30px; }.operations-heading p { display: flex; align-items: center; gap: 10px; margin-top: 7px; color: #9696a2; font-size: 11px; }.operations-heading p > span { color: #bcbcc4; }
 .heading-actions { display: flex; align-items: center; gap: 10px; }.demo-data { border: 1px solid var(--border); border-radius: 20px; color: #9b9ba6; font-size: 9px; padding: 9px 12px; white-space: nowrap; }
-.portfolio-summary { display: flex; align-items: center; gap: 26px; padding: 0 24px 18px; border-bottom: 1px solid var(--border); }.portfolio-summary > span { display: flex; align-items: baseline; gap: 8px; font-size: 10px; color: #9999a4; }.portfolio-summary strong { font-size: 17px; font-weight: 550; letter-spacing: -0.5px; color: #44444f; }.portfolio-summary small { font-size: 8px; color: #b0b0b9; }.summary-amount { margin-left: auto; }
-.operations-body { display: flex; align-items: stretch; height: 740px; }.operations-body.mobilization { height: 1060px; }.map-column { display: flex; flex-direction: column; flex: 1; min-width: 0; }.operations-panel { display: flex; flex-direction: column; width: 360px; flex-shrink: 0; border-left: 1px solid var(--border); background: #fff; min-height: 0; }
-.panel-tabs { display: flex; align-items: stretch; padding: 0 18px; border-bottom: 1px solid #eeeeef; flex-shrink: 0; }.panel-tabs button { flex: 1; padding: 16px 5px; border-bottom: 2px solid transparent; font-size: 11px; color: #9a9aa5; }.panel-tabs button.active { border-color: #29292f; color: var(--ink); font-weight: 550; }.panel-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.operations-body { display: flex; flex: 1; align-items: stretch; min-height: 0; overflow: hidden; }
+.map-column { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+.operations-panel { display: flex; flex-direction: column; width: 380px; flex-shrink: 0; border-left: 1px solid var(--border); background: #fff; min-height: 0; overflow: hidden; }
+.panel-tabs { display: flex; align-items: stretch; padding: 0 12px; border-bottom: 1px solid #eeeeef; flex-shrink: 0; }.panel-tabs button { flex: 1; padding: 13px 4px; border-bottom: 2px solid transparent; font-size: 10px; color: #9a9aa5; }.panel-tabs button.active { border-color: #29292f; color: var(--ink); font-weight: 550; }.panel-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .operation-notice { display: flex; align-items: center; gap: 10px; padding: 11px 24px; border-bottom: 1px solid #f4dbdf; background: #fff5f5; color: #b8787f; font-size: 10px; }.operation-notice > span { flex: 1; }.operation-notice button { display: flex; align-items: center; gap: 6px; font-size: 10px; }.operation-notice.applied { color: #5f9b76; background: #f1fbf5; border-color: #d4ecdd; }
 .operation-error { padding: 12px 24px; color: #bb6871; background: #fff4f4; font-size: 11px; border-bottom: 1px solid #f1dddd; }
 .report-body { display: flex; flex-direction: column; gap: 14px; padding: 5px; }.report-label { width: fit-content; color: #9c9ca7; background: #f3f3f5; border-radius: 5px; padding: 6px 9px; font-size: 10px; }.report-body > p { color: #9c9ca7; font-size: 11px; line-height: 19px; }.report-body pre { white-space: pre-wrap; overflow-wrap: anywhere; color: #747481; font: 12px/23px -apple-system, BlinkMacSystemFont, sans-serif; background: #f7f7f9; padding: 18px; margin: 0; border-radius: 8px; }.report-body :deep(.button) { align-self: flex-start; }

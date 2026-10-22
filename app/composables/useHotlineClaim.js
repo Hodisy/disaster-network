@@ -32,10 +32,10 @@ export function useHotlineClaim() {
         intakeDetails: claim.intake_details, priorityReason: claim.priority_reasons[0] || 'Situation requires review.', opened: true, priority: claim.priority || 'P2',
         access: ({ unknown: 'Unknown', restricted: 'Restricted', permitted_in_demo: 'Permitted' })[claim.access_status],
         situation: ({ habitable: 'Home habitable', uninhabitable: 'Home uninhabitable', unknown: 'Situation unconfirmed' })[claim.habitability],
-        accommodationNeeded: hasAccommodation, coverage: 'Not reviewed', catNat: 'Not verified',
+        accommodationNeeded: hasAccommodation, coverage: claim.assessment?.status === 'human_reviewed_proposal' ? 'Proposal' : 'Not reviewed', catNat: 'Not verified',
         requiredDocuments: claim.required_documents, source: 'postgresql', readGrantExpiresAt, updatedAt: claim.updated_at }
       if (!previous || previous.source !== 'postgresql') {
-        // Browser-only previews cannot count as persisted evidence in the Live claim.
+        // Discard scripted local previews. Live evidence is fetched through its scoped API.
         state.value.files.forEach(file => URL.revokeObjectURL(file.url))
         state.value.files = []; state.value.messages = []
       }

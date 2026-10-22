@@ -1,6 +1,6 @@
 # Demo data contract, version 1
 
-Disaster Network / fictional Allstorm Insurance. This is a database preparation deliverable, not a connected claim-handling backend. A subsequently authorized maintenance-only reset endpoint is available when explicitly configured. No login, users table or sessions table is introduced. All data is synthetic. Field names and canonical values are English; the frontend translates display labels.
+Disaster Network / fictional Allstorm Insurance. This document defines the original database preparation and subsequent scoped Live/document adapters. A subsequently authorized maintenance-only reset endpoint is available when explicitly configured. No login, users table or sessions table is introduced. All data is synthetic. Field names and canonical values are English; the frontend translates display labels.
 
 ## Scope and existing Aiven service
 
@@ -51,7 +51,7 @@ Money is integer cents in EUR. Status codes and IDs are stable values, not trans
 
 ## Jules and the small fixture
 
-The public IDs are defined once in [app/config/demo.js](../app/config/demo.js). The frontend composable exposes `customerId` and includes these identifiers on its mock claim for a future API adapter. No claim-handling API call or persistence adapter has been added. The settings maintenance action is the only database-backed application endpoint in this scope.
+The public IDs are defined once in [app/config/demo.js](../app/config/demo.js). The frontend composable exposes `customerId` and includes these identifiers on its mock claim for a future API adapter. The initial preparation did not include claim-handling APIs. Subsequent Live and document additions now use the existing schema; see the additions below.
 
 | Item | Initial data |
 | --- | --- |
@@ -67,7 +67,7 @@ The small fixture is not the complete 80-household portfolio defined in the [ins
 
 Event date: 20 October 2026. Report/demo date: 22 October 2026, Europe/Paris. Town-scale coordinates are illustrative, not exact households. Jules retains the address already used by the frontend as a scenario setting; it is not evidence of an actual damaged residence or a real resident. Contacts use the reserved `.invalid` domain and no real phone numbers. Product limits follow the fictional Allstorm brief. The sample general terms include exclusions and the fictional EUR 300 contents/building deductible. No source has been fetched, no real insurance PDF imported and no PDF pages fabricated. Text fixtures have nullable page numbers; real PDFs can later use `application/pdf`, extracted text, and actual page references.
 
-The frontend still simulates document collection and stage transitions. This work does not implement real identity verification. The fixture verification word is `olivier`; its stored format is `scrypt:<salt>:<digest>`, with lowercase/trimmed answer semantics for the Live verifier. This is public demo material, not a real identity factor. Before a successful check, the Live harness only receives verification results, never the private customer projection or answer hash. Keep the temporary verification result in the active call context; no login or database sessions are needed for this demo.
+The scripted frontend simulates document collection and stage transitions; the separately authorized Live document adapter stores actual selected files. This work does not implement real identity verification. The fixture verification word is `olivier`; its stored format is `scrypt:<salt>:<digest>`, with lowercase/trimmed answer semantics for the Live verifier. This is public demo material, not a real identity factor. Before a successful check, the Live harness only receives verification results, never the private customer projection or answer hash. Keep the temporary verification result in the active call context; no login or database sessions are needed for this demo.
 
 ## Commands and reset
 
@@ -93,10 +93,20 @@ The optional Live harness uses the existing schema without migrations. Before ve
 
 On explicit browser confirmation, the repository transaction updates Jules's existing claim: report, summary, habitability, restricted/unknown access, identified needs, required categories and priority. `claim_events.data` for `hotline_report_saved` contains `operation_id`, `fictional`, stable customer/policy IDs, `confirmation: explicit_browser_review` and `draft`. The draft retains safety, declared household, current accommodation, requested start/nights/constraints, needs and document codes. It does not store verification answers. A voice-channel client message stores the confirmed report narrative; complete call transcripts/audio are not persisted. Repeated operation IDs are idempotent under the maintenance advisory lock; stale drafts are rejected.
 
-This intake never changes contractual terms, assessment, coverage approval, site permission, money, assignments or claim stage. Local previews remain browser-only. The 80-household insurer portfolio still uses frontend synthetic fixtures for the other 79 households and financial/resource assumptions; the small PostgreSQL seed has only three customers. See the [Live guide](openai-live-hotline.md) for all tools, environment names, authorization/retention limits and steps the user can run. No service connection or live behavior has been verified.
+This intake never changes contractual terms, assessment, coverage approval, site permission, money, assignments or claim stage. Scripted previews remain browser-only; the subsequent verified Live evidence adapter stores attachments separately. The 80-household insurer portfolio still uses frontend synthetic fixtures for the other 79 households and financial/resource assumptions; the small PostgreSQL seed has only three customers. See the [Live guide](openai-live-hotline.md) for all tools, environment names, authorization/retention limits and steps the user can run. No service connection or live behavior has been verified.
 
 ## Realistic reference presentation — 22 October 2026
 
 Policy labels are **Allstorm Home Protect**, with six-digit references: Jules **123456**, Camille **123457**, Sam **123458**. Existing UUIDs and claim references are unchanged. The verification question is “What is your security word?” with the public evaluation word **olivier**, still stored only as the scrypt hash and checked on the server. Contacts remain non-deliverable reserved-domain examples. Policy documents remain UTF-8 text, with HP-prefixed clause references and an explicit evaluation-copy notice; they are not PDFs.
 
 A separately authorized Aiven reference refresh updated these labels, challenge hashes, controlled clauses, provider names and unchanged seeded assistant replies. It did not reset the database or change existing claims, user-written messages, attachments, events or assignments. Updated JSON and SQL fixtures match the new reference presentation. Full audio, app and browser validation remains unperformed in this pass.
+
+## Supporting-document addition — 22 October 2026
+
+See [the document workflow](evidence-workflow.md). The existing `documents` table stores actual selected JPG/PNG/WebP/PDF binaries and `customer_provided` provenance for the verified reserved dossier. The existing `claim_events` table records received documents, bounded AI extraction results/comparisons, analysis leases/failures and dated official-source checks. No schema migration or initial data update was run. Source policy documents remain text; runtime PDFs render current clauses with explicitly computed export-page references. Original source-page fields remain unchanged.
+
+AI extraction uses a private Responses model only after explicit browser agreement. `extraction_status = complete` means reading finished, not evidence accepted. Uploaded documents remain `needs_review` after reading. Consistent numerical checks do not approve eligibility, authenticity, payment or CatNat recognition. Claim stages, assessments, money and assignments are preserved. The official lookup uses Géorisques GASPAR, without general web search or embeddings. Runtime behaviour remains unverified in this implementation pass.
+
+## Insurer agent addition — 22 October 2026
+
+The user-authorized `bun run db:insurer` extended the existing schema additively to 80 claims / 170 people, 10 providers and 80 stored synthetic policy PDFs. Existing claim/message/document/assignment rows were fingerprint-checked unchanged. No reset or migration occurred. `policy_pdf_stored` events bind policy ID, PDF ID/SHA and current-source hash. `insurer_ai_proposal` events retain the bounded model proposal, source/data hash and tool trace. `insurer_human_decision` retains the exact proposal ID, approve/reject choice, note and evaluation-assignment IDs. Human approval can update classification/assessment and create `approved_in_demo` assignments under the maintenance lock; financial commitments, paid money, stage and site permission remain independent. See [the insurer agent guide](insurer-agent.md) for scopes, configuration and unperformed runtime validation.

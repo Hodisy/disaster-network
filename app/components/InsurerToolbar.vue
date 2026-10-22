@@ -29,7 +29,7 @@ defineEmits(['view', 'filter', 'advanced', 'clear'])
 
 <style scoped>
 .operations-toolbar { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); background: #fff; }
-.primary-row { display: flex; align-items: center; gap: 9px; padding: 0 23px; min-height: 62px; }
+.primary-row { display: flex; align-items: center; gap: 9px; padding: 0 23px; min-height: 48px; }
 .view-tabs { display: flex; align-self: stretch; gap: 22px; margin-right: 16px; flex-shrink: 0; }
 .view-tabs button { padding: 0 2px; border-bottom: 2px solid transparent; font-size: 12px; color: #8a8a95; }
 .view-tabs button.active { color: var(--ink); border-color: var(--ink); font-weight: 600; }

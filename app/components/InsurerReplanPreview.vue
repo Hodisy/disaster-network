@@ -6,15 +6,15 @@ defineEmits(['apply', 'close', 'claim'])
 
 <template>
   <section class="replan-preview">
-    <header><h2>{{ t('Replanning preview') }}</h2><button :aria-label="t('Close replanning preview')" @click="$emit('close')"><UiIcon name="X" :size="15" /></button></header>
+    <header><h2>{{ t('Replacement plan') }}</h2><button :aria-label="t('Close replacement plan')" @click="$emit('close')"><UiIcon name="X" :size="15" /></button></header>
     <div class="outage-note"><UiIcon name="Truck" :size="19" /><span>{{ t('{name} is unavailable.', { name: plan.provider.name }) }}<small>{{ t('{count} assignments affected', { count: plan.changes.length }) }}</small></span></div>
     <h3>{{ t('Affected missions') }}</h3>
     <div v-for="change in plan.changes" :key="change.mission.id" class="change-card">
       <button class="affected-name" @click="$emit('claim', change.mission.claimId)"><span>{{ t(change.mission.claim.name, change.mission.claim.nameParameters) }}<small>{{ change.mission.claimId }} · {{ change.mission.claim.municipality }}</small></span><UiIcon name="ChevronRight" :size="13" /></button>
-      <div class="comparison"><div><span>{{ t('Before') }}</span><strong>{{ plan.provider.name }}</strong><small>{{ formatDate(change.mission.start, { month: 'short', year: undefined }) }} · {{ formatTime(change.mission.start) }}</small></div><UiIcon name="ArrowRight" :size="14" /><div :class="{ replacement: change.replacement }"><span>{{ t('Proposed') }}</span><strong>{{ change.replacement?.name || t('No eligible replacement') }}</strong><small v-if="change.start">{{ formatTime(change.start) }} · {{ t('Access permitted in scenario') }}</small></div></div>
+      <div class="comparison"><div><span>{{ t('Before') }}</span><strong>{{ plan.provider.name }}</strong><small>{{ formatDate(change.mission.start, { month: 'short', year: undefined }) }} · {{ formatTime(change.mission.start) }}</small></div><UiIcon name="ArrowRight" :size="14" /><div :class="{ replacement: change.replacement }"><span>{{ t('Proposed') }}</span><strong>{{ change.replacement?.name || t('No eligible replacement') }}</strong><small v-if="change.start">{{ formatTime(change.start) }} · {{ t('Access reviewed') }}</small></div></div>
     </div>
     <h3>{{ t('Planning impact') }}</h3><div class="impact-row"><UiIcon name="Clock3" :size="16" /><span>{{ t('Maximum start delay') }}</span><strong>+{{ t('{count}h', { count: plan.maxDelay }) }}</strong></div><div class="impact-row"><UiIcon name="FileText" :size="16" /><span>{{ t('Estimated mission cost change') }}</span><strong>+{{ formatMoney(plan.costDelta) }}</strong></div><div class="impact-row"><UiIcon name="ShieldCheck" :size="16" /><span>{{ t('{count} blocked missions stay blocked', { count: blocked }) }}</span></div>
-    <p class="assumptions">{{ t('Delays and costs are fixture assumptions, not measured routing or real quotes. Applying this plan does not approve coverage or make a payment.') }}</p>
+    <p class="assumptions">{{ t('Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.') }}</p>
     <UiButton class="dark" :disabled="pending || !plan.canApply" @click="$emit('apply')">{{ t(pending ? 'Updating…' : 'Apply proposed plan') }}</UiButton><UiButton :disabled="pending" @click="$emit('close')">{{ t('Cancel') }}</UiButton>
   </section>
 </template>

@@ -3,7 +3,8 @@ const { t, locale, setLocale } = useAppI18n()
 const { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase, localConfirming, resetLocal } = useDemoSettings()
 const { source } = useHotlineClaim()
 const { access, accessKey, restoreAccess, unlock } = useHotlineAccess()
-onMounted(restoreAccess)
+const { data: insurerData, accessKey: insurerKey, busy: insurerBusy, error: insurerError, restore: restoreInsurer, unlock: unlockInsurer } = useInsurerAgent()
+onMounted(() => { void restoreAccess(); void restoreInsurer() })
 useHead(() => ({ title: t('Settings — Disaster Network') }))
 </script>
 
@@ -15,6 +16,7 @@ useHead(() => ({ title: t('Settings — Disaster Network') }))
       <LanguageToggle :locale="locale" @change="setLocale" />
     </section>
     <HotlineSettingsPanel v-model:mode="source" :authorized="access.authorized" :checking="access.checking" v-model:access-key="accessKey" :error="access.error ? hotlineErrorPhrase(access.error) : ''" @unlock="unlock" />
+    <InsurerAgentSettings :authorized="insurerData.authorized" v-model:access-key="insurerKey" :busy="insurerBusy" :error="insurerError" @unlock="unlockInsurer" />
     <LocalDemoResetPanel :confirming="localConfirming" @request="localConfirming = true" @cancel="localConfirming = false" @confirm="resetLocal" />
     <DemoSettingsPanel :pending="pending" :confirming="confirming" v-model:maintenance-key="maintenanceKey" :error="error" :result="result" @request-reset="requestReset" @cancel-reset="cancelReset" @confirm-reset="resetDatabase" />
     <NuxtLink to="/hotline" class="back-link"><UiIcon name="ArrowLeft" :size="14" />{{ t('Back to the hotline') }}</NuxtLink>

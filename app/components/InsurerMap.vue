@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({ claims: Object, providers: Object, assignments: Object, proposed: Object, selected: Object, showPopup: Boolean, stats: Object, appearance: { type: String, default: 'workspace' }, openLabel: { type: String, default: 'Open claim' } })
+const props = defineProps({ claims: Object, providers: Object, assignments: Object, proposed: Object, selected: Object, showPopup: Boolean, fit: Boolean, stats: Object, appearance: { type: String, default: 'workspace' }, openLabel: { type: String, default: 'Open claim' } })
 const emit = defineEmits(['select', 'open', 'provider', 'dismiss-popup'])
 const { t } = useAppI18n()
 const canvas = ref(null)
@@ -7,7 +7,7 @@ const { loading, error, popupPosition, resetView, zoom, retry } = useOperationsM
 </script>
 
 <template>
-  <section class="map-region" :aria-label="t('Reported households around Berre Lagoon')">
+  <section class="map-region" :class="{ fit }" :aria-label="t('Reported households around Berre Lagoon')">
     <div class="map-surface">
       <div ref="canvas" class="map-canvas" />
       <div class="map-caption"><span />{{ t('Approximate locations · Household privacy') }}<small>{{ t('{count} shown on map', { count: claims.features.length }) }}</small></div>
@@ -33,6 +33,12 @@ const { loading, error, popupPosition, resetView, zoom, retry } = useOperationsM
 <style src="maplibre-gl/dist/maplibre-gl.css"></style>
 <style scoped>
 .map-region { display: flex; flex-direction: column; flex: 1; min-width: 0; background: #f1f3f3; }
+.map-region.fit { min-height: 0; }
+.fit .map-surface { min-height: 0; }
+.fit .map-legend { flex-shrink: 0; gap: 12px; padding: 10px 14px; min-height: 62px; }
+.fit .priority-items { gap: 12px; }
+.fit .provider-legend { padding-left: 12px; }
+.fit .accommodation-total { max-width: 180px; }
 .map-surface { position: relative; flex: 1; min-height: 560px; overflow: hidden; }
 .map-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-caption { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: #fffffff0; border: 1px solid #e5e5e8; border-radius: 6px; color: #8c8c96; font-size: 9px; pointer-events: none; }
