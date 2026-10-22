@@ -1,0 +1,34 @@
+DISASTER NETWORK - DEMONSTRATION PRODUIT EN TROIS MINUTES
+
+Objectif : un parcours client de bout en bout en 180 secondes maximum. Laisser entendre l'appel réel, sans narration simultanée. Si la séquence est scriptée, l'indiquer clairement ; ne pas remplacer des réponses réelles par des réponses simulées.
+
+AVANT L'ENREGISTREMENT
+Utiliser la version la plus récente, choisir le mode vocal dans Settings et déverrouiller le navigateur hors champ. Revenir à /hotline. Le contrat actuel de Jules est 123456. La réponse de vérification de l'environnement d'évaluation figure dans AGENTS.md ; la saisir seulement au moment de la question, sans la publier dans les sous-titres ou les supports. Ne pas montrer de clé ou de console privée. Ne pas réinitialiser des données à conserver.
+
+00:00-00:15 - LE PROBLEME CLIENT
+Ecran : la hotline et son orbe.
+Narration : « Après une inondation, les déclarations arrivent toutes en même temps. Disaster Network relie le premier appel à la coordination opérationnelle pour absorber ce pic sans perdre la maîtrise des interventions. »
+
+00:15-01:25 - DECLARATION VOCALE ET ENREGISTREMENT
+Cliquer sur l'orbe et laisser l'assistante se présenter.
+Client : « Je suis Jules. Mon numéro de contrat est le 123456. De l'eau est entrée chez moi à Istres et j'ai besoin d'assistance. »
+Répondre à la question de vérification lorsqu'elle est posée.
+Client : « Ma compagne, notre enfant et moi sommes en sécurité chez ma soeur, mais nous ne pouvons pas y rester. Nous sommes trois. Notre rez-de-chaussée est inondé. Nous avons besoin d'un hébergement à partir du 22 octobre pour quatre nuits. Nous ne savons pas si l'accès au logement est autorisé. J'ai déjà des photos prises avant notre départ. »
+Client : « Vérifiez les conditions d'hébergement de mon contrat et préparez ma déclaration avec la liste des documents nécessaires. »
+Montrer les véritables résultats d'outils et clauses si disponibles. Relire, confirmer la déclaration dans le navigateur et attendre la confirmation d'enregistrement PostgreSQL.
+
+01:25-01:55 - LE MEME DOSSIER DANS MY CLAIM
+Montrer CAT-2026-001, les besoins et les catégories de pièces demandées.
+Narration : « Le client confirme sa déclaration avant l'enregistrement. My claim relit ce même dossier depuis PostgreSQL chez Aiven. Les pièces demandées restent visibles. Dans ce prototype, les aperçus sont locaux : ils ne constituent ni un véritable upload ni une validation de couverture. »
+
+01:55-02:40 - COORDINATION COTE ASSUREUR
+Basculer vers Allstorm Insurance et /insurer. Retrouver Jules puis montrer la carte.
+Narration : « Jules apparaît une seule fois parmi 80 foyers synthétiques représentant 170 personnes. L'assureur visualise les priorités, besoins, estimations et ressources. Le portefeuille est un jeu de données frontend ; la déclaration de Jules est le dossier enregistré. »
+Ouvrir Mobilization et la simulation d'indisponibilité d'un prestataire. Montrer les deux missions touchées, prévisualiser les remplacements puis appliquer le plan si possible.
+Narration : « Le plan tient compte des compétences, des capacités libres et des autorisations d'accès. Les interventions physiques restent bloquées lorsque l'accès n'est pas autorisé. Les réaffectations sont simulées. »
+
+02:40-03:00 - LA PREUVE ET LA VALEUR
+Afficher le PDF de comparaison ou la slide unique.
+Narration : « Dans notre comparaison reproductible, l'allocation naïve surcharge un prestataire sur deux missions. Les règles de l'application trouvent deux remplacements valides et conservent trois missions bloquées. Nous visons une assistance plus rapide et un coût de traitement réduit. Le gain financier de 65 % est une hypothèse, pas une économie mesurée. »
+
+Exporter en MP4 H.264/AAC, format 16:9, au maximum 180 secondes. Vérifier l'audio exporté, la lisibilité, la confirmation réelle d'enregistrement et l'absence de secrets. Le scénario est préparé ; cette tâche n'a pas enregistré le MP4 du parcours vocal.

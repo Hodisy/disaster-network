@@ -21,7 +21,7 @@ const { t, formatDate } = useAppI18n()
         <h3>{{ t('An AI hotline that carries the context forward.') }}</h3>
         <p>{{ t('Identify the caller, retrieve the contract context and capture the need. Request the supporting documents in My claim.') }}</p>
         <div class="conversation" :aria-label="t('Illustrative conversation')"><blockquote><cite>Jules</cite><p>{{ t('We need somewhere to stay. There are three of us.') }}</p></blockquote><blockquote><cite>{{ t('AI hotline') }}</cite><p>{{ t('I’ll check your contract and list the documents to send in My claim.') }}</p></blockquote></div>
-        <NuxtLink to="/hotline" class="journey-link">{{ t('Try Jules’s hotline') }}<UiIcon name="ArrowRight" :size="18" /></NuxtLink>
+        <NuxtLink to="/hotline" class="journey-link">{{ t('Try Jules’s hotline') }}</NuxtLink>
       </div>
     </div>
     <ol class="steps">
@@ -56,7 +56,7 @@ figcaption > span:last-child { color: #93939c; font-size: 10px; line-height: 17p
 blockquote { display: flex; align-items: baseline; gap: 14px; margin: 13px 0 0; }
 cite { flex: 0 0 62px; color: #36363c; font-size: 10px; line-height: 18px; font-weight: 500; font-style: normal; }
 blockquote p { color: #898991; font-size: 12px; line-height: 20px; }
-.journey-link { display: inline-flex; align-items: center; gap: 16px; margin-top: 24px; padding-bottom: 4px; border-bottom: 1px solid #b5b5bd; font-size: 13px; line-height: 22px; }
+.journey-link { display: inline-flex; align-items: center; margin-top: 24px; padding-bottom: 4px; border-bottom: 1px solid #b5b5bd; font-size: 13px; line-height: 22px; }
 .journey-link:hover { border-color: #171719; }
 .steps { display: flex; align-items: stretch; gap: 24px; margin-top: 56px; }
 .steps li { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: flex-start; padding: 30px 30px 28px; background: #fafafa; border-radius: 20px; }

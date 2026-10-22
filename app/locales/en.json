@@ -836,5 +836,11 @@
   "Replacement plan": "Replacement plan",
   "Close replacement plan": "Close replacement plan",
   "Access reviewed": "Access reviewed",
-  "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.": "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval."
+  "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.": "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.",
+  "Voice calling is ready. No access key is required.": "Voice calling is ready. No access key is required.",
+  "Preparing voice calling…": "Preparing voice calling…",
+  "Voice calls are available without a workspace key. Policy verification is still required before accessing customer information.": "Voice calls are available without a workspace key. Policy verification is still required before accessing customer information.",
+  "Set the allowed application origin on the server.": "Set the allowed application origin on the server.",
+  "Voice access could not be prepared. Reload the page and check that its address matches the configured application origin.": "Voice access could not be prepared. Reload the page and check that its address matches the configured application origin.",
+  "Reload the hotline and verify your policy again to access the documents.": "Reload the hotline and verify your policy again to access the documents."
 }

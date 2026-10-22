@@ -7,7 +7,7 @@ const { t } = useAppI18n()
   <section id="scenarios" class="scenarios" aria-labelledby="scenarios-title">
     <span class="section-label">{{ t('Other scenarios') }}</span>
     <h2 id="scenarios-title">{{ t('Different disasters. The same need to coordinate.') }}</h2>
-    <p class="section-intro">{{ t('Five illustrative scenarios beyond Jules’s flood claim.') }}</p>
+    <p class="section-intro">{{ t('Five response scenarios beyond Jules’s flood claim.') }}</p>
     <div class="scenario-list">
       <article v-for="scenario in scenarios" :key="scenario.id" class="scenario" :aria-labelledby="`scenario-${scenario.id}`">
         <img :src="scenario.image" :alt="t(scenario.alt)" width="1536" height="1024" loading="lazy" decoding="async" />
@@ -16,7 +16,7 @@ const { t } = useAppI18n()
         <dl><div><dt>{{ t('Household need') }}</dt><dd>{{ t(scenario.need) }}</dd></div><div><dt>{{ t('Coordinated response') }}</dt><dd>{{ t(scenario.response) }}</dd></div></dl>
       </article>
     </div>
-    <div class="scenario-note"><span>{{ t('Illustrative scenarios') }}</span><p>{{ t('These five scenarios show possible applications. They are not separate working demos or statements of insurance coverage. Contracts, local rules and specialist review would differ.') }}</p></div>
+    <div class="scenario-note"><span>{{ t('Response scenarios') }}</span><p>{{ t('Apply the coordination approach to other hazards, with contracts, local rules and specialist review adapted to each situation.') }}</p></div>
   </section>
 </template>
 

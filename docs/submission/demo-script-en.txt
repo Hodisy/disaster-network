@@ -1,0 +1,37 @@
+DISASTER NETWORK - THREE-MINUTE PRODUCT DEMO
+
+Recording target: one continuous customer journey, 180 seconds maximum, English. Leave live call audio audible; do not narrate over the caller or assistant. A scripted recording must be labelled scripted; never splice mock replies into a call presented as live.
+
+PREPARE BEFORE RECORDING
+Use the latest local application or the same verified deployed version. Keep secrets and Settings off-screen. Select Live AI voice in Settings, unlock browser access, then return to /hotline. A new server deployment/restart can invalidate that cookie. Confirm that Jules's stored contract is 123456. The current public evaluation security word is in AGENTS.md; enter it only when asked, never display it in a slide, subtitles or public transcript. Do not reset a database containing work you need to keep. Keep any API/maintenance keys out of the recording.
+
+00:00-00:15 - CUSTOMER PROBLEM
+Screen: /hotline, clean workspace and particle orb.
+Narration: "After a flood, an insurer receives a wave of claims at once. Disaster Network connects the first call to operational coordination, so teams can absorb demand without losing control of the response."
+
+00:15-01:25 - LIVE INTAKE, VERIFICATION, SOURCE CLAUSES, SAVE
+Click the orb. Let the assistant introduce itself.
+Caller: "I'm Jules. My policy number is 123456. Water entered my home in Istres and I need assistance."
+When the assistant asks its verification question, answer with the evaluation security word. Keep that short exchange out of published captions.
+Caller: "My partner, our child and I are safe at my sister's, but we cannot stay there. There are three of us. Our ground floor is flooded. We need accommodation from 22 October for four nights. We don't know whether access to the property is permitted. I already have photos taken before we left."
+Caller: "Please check the accommodation requirements in my policy and prepare my report with the documents you need."
+Show actual tool traces/source references if exposed by the report. Do not claim a clause was retrieved if the tool did not return it. Review the draft and click Confirm and save report only if accurate. Wait for the database-success label.
+If this live exchange runs long, shorten the introduction and insurer narration, not verification or the actual persistence confirmation.
+
+01:25-01:55 - SAME DOSSIER IN MY CLAIM
+Screen: /client. Show CAT-2026-001, household/assistance facts and requested photo/address/inventory categories.
+Narration: "The customer confirms the report before it is saved. My claim now reads that same record from Aiven PostgreSQL. Requested evidence remains visible. File previews are local in this prototype; they do not prove coverage or trigger a booking."
+Do not advance simulated stages on this live claim or present a browser file preview as a completed server upload.
+
+01:55-02:40 - INSURER OPERATIONS AND A NEW CONSTRAINT
+Switch to Allstorm Insurance and open /insurer. Select Jules, then show the regional portfolio. Search/select CAT-2026-001 so the link is visible.
+Narration: "Jules appears once in a portfolio of 80 synthetic households and 170 people. The workspace combines needs, priority, cost estimates and resource constraints. The remaining portfolio is a frontend fixture; Jules's intake is the persisted record."
+Select Mobilization. Trigger the provider-outage preview. Show two disrupted drying missions, then the proposed replacements. Apply proposed plan if it is feasible.
+Narration: "When a drying provider becomes unavailable, the plan checks skills, free capacity and site access before reassignment. Physical visits to properties without access permission remain blocked. This is a resource simulation, not a real dispatch."
+
+02:40-03:00 - MEASURED COMPARISON AND VALUE
+Screen: evidence PDF or the single pitch slide.
+Narration: "In our reproducible outage comparison, the naive allocation overloads a provider twice. The application's data-aware rules produce two feasible replacements and preserve three blocked missions. Our target is faster assistance and lower handling cost. The 65 percent cost reduction is a financial hypothesis, not a measured result."
+
+EXPORT
+MP4, H.264 video, AAC audio, 16:9, ideally 1920x1080 or 1280x720, duration no more than 180 seconds. Listen to the exported audio and verify captions, readable text, absence of credentials and the real save confirmation. This script is prepared; no live-journey MP4 has been recorded by this task.

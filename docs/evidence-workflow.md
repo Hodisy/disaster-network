@@ -4,7 +4,7 @@ Implemented source, 22 October 2026. Allstorm policies and dossier identities re
 
 ## Small complete workflow
 
-1. Unlock the workspace in Settings and verify Jules's policy during a Live call. Save the report, or read the existing reported claim through the verified harness. This issues a separate 30-minute evidence capability for the same browser, alongside the claim read grant.
+1. Open the enabled public hotline and verify Jules's policy during a Live call. Save the report, or read the existing reported claim through the verified harness. This issues a separate 30-minute evidence capability for the same browser, alongside the claim read grant.
 2. Open My claim. Download the policy PDF, attach existing damage photos or a supporting PDF. Stored files are shown only after PostgreSQL confirms them. Refresh re-reads the dossier's files through the protected endpoint.
 3. Choose AI reading explicitly. With that choice selected, Attach and read stores each file first, then sends it to OpenAI for extraction. Without it, files are stored without AI processing. Read document can process a saved file later. A failure to read never removes a successfully stored file.
 4. Review the extracted observations/invoice fields, deterministic comparisons and policy clause/page. Every result remains subject to review. No claim stage, coverage, site access, payment, booking or assignment is changed.
@@ -44,7 +44,7 @@ Results are `matching_record_found`, `no_matching_record`, `incomplete` or `unav
 
 ## API and authorization
 
-`POST /api/hotline/evidence/{list,upload,download,contract,analyze,source}` -> evidence core -> repository/service. Every action requires the existing enabled/private workspace admission, exact Origin, custom `X-Hotline-Request` header, HttpOnly same-site cookie and unexpired evidence capability. The cookie's existing `/api/hotline` path covers these nested endpoints. The evidence capability is issued only after verified access to a reported dossier; the workspace key alone is insufficient. It survives voice termination but expires after 30 minutes and disappears on server restart. This remains evaluation access control, not production authentication.
+`POST /api/hotline/evidence/{list,upload,download,contract,analyze,source}` -> evidence core -> repository/service. Every action requires the enabled public browser admission, exact Origin, custom `X-Hotline-Request` header, HttpOnly same-site cookie and unexpired evidence capability. The cookie's existing `/api/hotline` path covers these nested endpoints. The evidence capability is issued only after verified access to a reported dossier; public browser admission alone is insufficient. It survives voice termination but expires after 30 minutes and disappears on server restart. This remains evaluation access control, not production authentication.
 
 Upload uses one multipart `file`, `kind` and optional `locale`; other actions use a bounded JSON body. Analyze requires `documentId` and `consent: true`. Download accepts only a UUID belonging to the reserved dossier; contract ignores arbitrary policy IDs. Downloads use attachment disposition, no-store and nosniff. Browser previews fetch through that same protected API, create local object URLs and release them on navigation. PDFs are sandboxed with a download alternative. Errors expose safe codes only. All database work uses the marked schema, parameterized statements and the same advisory transaction lock as maintenance reset. No lock is held across OpenAI or Géorisques calls.
 

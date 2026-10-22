@@ -1,4 +1,4 @@
-import { authorize, ownerFor, checkOrigin, limit, createSession, snapshot, confirmReport, readAuthorizedClaim, closeSession, interrupt, changeLanguage } from '../../core/hotline/sessions.js'
+import { admitBrowser, ownerFor, checkOrigin, limit, createSession, snapshot, confirmReport, readAuthorizedClaim, closeSession, interrupt, changeLanguage } from '../../core/hotline/sessions.js'
 
 export default defineEventHandler(async event => {
   setResponseHeader(event, 'Cache-Control', 'no-store')
@@ -20,15 +20,14 @@ export default defineEventHandler(async event => {
     try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')) }
     catch { throw Object.assign(new Error(), { code: 'INVALID_REQUEST', statusCode: 400 }) }
     const action = getRouterParam(event, 'action')
-    if (action === 'authorize') {
-      const capability = authorize(config, body?.token, ip)
-      setCookie(event, 'disaster-hotline', capability, { httpOnly: true, secure: config.hotlineOrigin.startsWith('https://'), sameSite: 'strict', path: '/api/hotline', maxAge: 3600 })
-      return { ok: true }
+    if (action === 'access' || action === 'authorize') {
+      const admission = admitBrowser(config, getCookie(event, 'disaster-hotline'), ip)
+      if (admission.created) setCookie(event, 'disaster-hotline', admission.capability, { httpOnly: true, secure: config.hotlineOrigin.startsWith('https://'), sameSite: 'strict', path: '/api/hotline', maxAge: 3600 })
+      return { ok: true, authorized: true }
     }
     const owner = ownerFor(config, getCookie(event, 'disaster-hotline'))
     let result
-    if (action === 'access') result = { authorized: true }
-    else if (action === 'session') result = await createSession(owner, config, body, ip)
+    if (action === 'session') result = await createSession(owner, config, body, ip)
     else if (action === 'status') result = snapshot(owner)
     else if (action === 'claim') result = await readAuthorizedClaim(owner, config)
     else if (action === 'confirm') result = await confirmReport(owner, config, body)

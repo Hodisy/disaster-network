@@ -1,0 +1,5 @@
+metric,naive_no_capacity_context,data_aware_application
+affectedMissions,2,2
+feasibleAssignments,0,2
+invalidAssignments,2,0
+unassignedMissions,0,0

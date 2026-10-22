@@ -1,0 +1,113 @@
+{
+  "scenario": {
+    "households": 80,
+    "people": 170,
+    "initial_calls": 80,
+    "claim_forms": 80,
+    "supporting_files_per_claim": 3,
+    "supporting_files": 240
+  },
+  "assumptions": {
+    "manual_minutes_per_claim": [
+      30,
+      45
+    ],
+    "manual_tasks_minutes": {
+      "intake_call": [
+        12,
+        18
+      ],
+      "form_and_policy_lookup": [
+        5,
+        7
+      ],
+      "three_file_review": [
+        9,
+        14
+      ],
+      "coordination_and_status": [
+        4,
+        6
+      ]
+    },
+    "human_review_minutes_per_claim": [
+      2,
+      4
+    ],
+    "escalation_rate": [
+      0.2,
+      0.4
+    ],
+    "extra_minutes_per_escalated_claim": 20,
+    "loaded_staff_cost_eur_per_hour": [
+      40,
+      60
+    ],
+    "ai_infrastructure_allowance_eur_per_claim": [
+      1,
+      3
+    ]
+  },
+  "calculated_bounds": {
+    "manual_staff_hours_for_80": [
+      40,
+      60
+    ],
+    "assisted_staff_hours_for_80": [
+      8,
+      16
+    ],
+    "released_staff_hours_for_80": [
+      24,
+      52
+    ],
+    "manual_cost_eur_per_claim": [
+      20,
+      45
+    ],
+    "assisted_cost_eur_per_claim": [
+      5,
+      15
+    ],
+    "manual_cost_eur_for_80": [
+      1600,
+      3600
+    ],
+    "assisted_cost_eur_for_80": [
+      400,
+      1200
+    ]
+  },
+  "displayed_rounded_ranges": {
+    "manual_staff_hours_for_80": "40-60",
+    "assisted_staff_hours_for_80": "8-16",
+    "released_staff_hours_for_80": "about 25-50",
+    "manual_cost_eur_for_80": "about 1500-4000",
+    "assisted_cost_eur_for_80": "about 400-1200",
+    "manual_cost_eur_for_1000": "about 20000-45000",
+    "assisted_cost_eur_for_1000": "about 5000-15000"
+  },
+  "formulas": {
+    "assisted_human_minutes": "review_minutes + escalation_rate * extra_minutes_per_escalated_claim",
+    "staff_hours": "claims * human_minutes / 60",
+    "manual_cost": "manual_staff_hours * hourly_staff_cost",
+    "assisted_cost": "assisted_staff_hours * hourly_staff_cost + claims * technical_allowance"
+  },
+  "interpretation": "Planning ranges from explicit assumptions, not observed insurer averages or measured savings. Cost envelopes are not paired confidence intervals; no exact saving percentage is asserted.",
+  "scope": "Intake, qualification, initial evidence review and assistance planning. Excludes indemnities, field services, integration, subscription and maintenance.",
+  "sources": [
+    {
+      "publisher": "Meteo-France",
+      "date": "2026-10-21",
+      "url": "https://meteofrance.com/episode-mediterraneen-plus-de-600-mm-de-pluie-tombes-en-24-h-a-solenzara-en-corse",
+      "fact": "Episode totals: Istres 275 mm; Saint-Chamas 315 mm."
+    },
+    {
+      "publisher": "City of Istres",
+      "date": "2026-10-20",
+      "url": "https://www.istres.fr/index.php?id=634&tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=13446",
+      "fact": "Emergency plan, reception facilities, evacuation and closed access roads."
+    }
+  ],
+  "measured_planning_record": "docs/submission/evidence/benchmark-results.json"
+}

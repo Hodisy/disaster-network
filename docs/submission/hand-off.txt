@@ -1,0 +1,43 @@
+DISASTER NETWORK - SUBMISSION HANDOFF
+
+Prepared on 22 October 2026. Submission text and primary pitch slide are in English; French text and a French recording script are included.
+
+1. THREE-MINUTE DEMO / MP4
+Use demo-script-en.txt (or demo-script-fr.txt) to record the actual application journey. The script covers hotline verification and confirmed save, the same claim in My claim, the insurer portfolio, provider-outage replanning and the benchmark result. No MP4 of a live end-to-end journey has been recorded in this preparation task. Do not submit a slideshow or scripted call as a verified live product recording.
+
+2. THE DATA LAYER IN ACTION / WRITE
+Paste data-layer-en.txt into the submission form; data-layer-fr.txt is its French companion. The copy was reviewed against the current source on 22 October 2026 and now covers OpenAI Realtime, OpenAI Responses document extraction and insurer classification, Aiven repositories, actual PDF/photo persistence, Georisques GASPAR and optional official-domain web search. It describes human-reviewed planning, not external dispatch or payment. Generated evaluation records are identified once without repeating demonstration jargon throughout the product pitch.
+The new insurer and evidence paths were inspected in source only during this submission-text pass. No build, app/browser test, database query, paid model call, live GASPAR request or deployment was run. Source implementation is not evidence of successful remote execution. In particular, the current database row count and enabled hosted feature flags were not checked. The optional web-search flag defaults to false in source.
+
+3. EVIDENCE IT WORKS / UPLOAD
+Upload output/evidence-it-works.pdf, now a two-page English operations benchmark. Page 1 uses the documented 20 October Istres/Berre Lagoon event as context and the 80-household / 170-person evaluation portfolio as its workload unit. It assumes 80 initial calls, 80 forms and three supporting files per claim (240 files).
+The workload/cost model now uses planning ranges: 30-45 manual minutes per claim; 2-4 review minutes plus 20-40% escalated for 20 extra minutes, giving 6-12 assisted human minutes. Staff-hour cost is assumed at EUR 40-60 and the technical allowance at EUR 1-3/claim. For 80 claims: 40-60 versus 8-16 staff hours, about 25-50 hours released; about EUR 1.5-4k versus EUR 0.4-1.2k operating cost. Per claim: about EUR 20-45 versus EUR 5-15. These are rounded scenario estimates, not observed insurer averages or measured savings. No exact savings percentage is asserted. Formulas and unrounded calculation bounds are in evidence/operations-model.json. Scope excludes indemnities, field services, integration, subscription and maintenance.
+Page 2 highlights implemented identity, source, capacity, access, idempotency, freshness and human-review controls; the insurer's macro view; and the previously executed capacity benchmark. The recorded planning comparison gives 0/2 versus 2/2 feasible replacements and two versus zero capacity conflicts, preserving three blocked missions. This measured result remains separate from the cost model and from OpenAI classification quality.
+Raw records: evidence/benchmark-results.json and .csv. Reproduce the planning run with bun run scripts/submission-benchmark.js. The previous single-topic PDF is preserved as output/evidence-capacity-original.pdf; it is superseded for upload. The source review and PDF edit did not run the application, live model calls, database operations or new operational tests.
+
+4. ONE PITCH SLIDE / PUBLIC GOOGLE SLIDES
+Current submission URL: https://docs.google.com/presentation/d/1MzBdjHUjWCAXodPqNkfdBS4Kdi3h7xOoAJRHxqz7JMU/edit
+The user explicitly requested Google publication after the earlier local-only preference. The existing one-slide Google presentation was updated with the approved full-slide image, output/pitch-slide-speed-scale.png, as its background. Speaker notes now describe the current source integrations. The Share dialog visibly confirmed Anyone with the link / Viewer. The saved Google Slides canvas was visually checked. An independent signed-out access test was not performed.
+Local copies remain output/disaster-network-pitch.pdf (one page), output/pitch-slide-speed-scale.png and output/pitch-slide-speed-scale.pptx (image only). The exact generation prompt is assets/speed-scale-imagegen-prompt.txt. All slide text is black; #0af06d is the requested accent. The visible benchmark remains the previously executed capacity comparison, independently of the newer AI classification workflow.
+
+5. OPTIONAL LINKS
+Demo: https://getdisasternetwork.com/hotline
+Repository: https://github.com/Hodisy/disaster-network
+These are the project URLs supplied in this task. Public anonymous access, deployment freshness and repository visibility were not verified here.
+
+RECORDING CHECKLIST
+- Use the same current version throughout the recording. The browser origin and server configuration must match.
+- Select voice mode and unlock access in Settings before recording. Never show keys or the private Aiven console.
+- Confirm Jules's stored policy is 123456. The reference-data refresh was recorded as applied in README; confirm that your recording uses that current environment.
+- Keep identity verification, report preparation and explicit save confirmation in the journey. No invented persistence or automatic coverage approval.
+- Show the same CAT-2026-001 once in the insurer portfolio; the total remains 80 households / 170 people.
+- Treat the remaining portfolio, provider capacities, locations and money estimates as synthetic operational fixtures.
+- The current source adds protected PostgreSQL attachment storage, consented OpenAI reading and an insurer proposal/review path. Verify these on the recording environment before showing them. Scripted mode still uses local files. No external provider booking, payment or physical dispatch is connected.
+- The runtime incident-context module imports docs/scenarios/hotline-incident-context.json. The current .dockerignore excludes docs; ensure the deployment includes that required file before rebuilding for a remote recording. No deployment change was made by this submission-preparation task.
+- Verify that the exported MP4 is readable, has clear audio, lasts no more than 180 seconds and contains no credentials.
+
+FINANCIAL PLANNING RANGES
+The previous point estimates (including the exact per-claim cost and fixed percentage) are superseded by the ranges above. At 1,000 claims the same assumptions give approximately EUR 20-45k manual operating cost versus EUR 5-15k assisted. These envelopes are not confidence intervals or a guaranteed financial return. Released staff time supports peak capacity; cash savings depend on avoided overtime, temporary staffing or outsourced handling.
+
+FRENCH SUMMARY
+Le texte anglais et sa version française sont à jour des nouvelles intégrations du code. La slide finale est dans Google Slides, accessible à toute personne disposant du lien en lecture ; le PDF local est conservé. Les nouveaux parcours IA/documentaires ont été relus dans le code, sans nouvelle validation d'exécution distante. Il reste à enregistrer le vrai parcours en MP4. Le benchmark porte sur les capacités des prestataires ; les économies financières restent des hypothèses.

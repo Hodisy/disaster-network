@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomBytes } from 'node:crypto'
 import { liveRequest, attachLive } from '../../services/openaiLive.js'
 import { hotlineTools, newHarnessContext, runTool, saveDraft, publicDraft, assertVerified } from './harness.js'
 import { readClaim, assertHotlineReady } from '../../repositories/hotlineClaims.js'
@@ -6,7 +6,6 @@ import { readClaim, assertHotlineReady } from '../../repositories/hotlineClaims.
 const owners = new Map()
 const limits = new Map()
 const fail = (code, statusCode = 400) => { throw Object.assign(new Error(code), { code, statusCode }) }
-const hash = value => createHash('sha256').update(value).digest()
 const allowedErrors = new Set(['DATABASE_NOT_CONFIGURED', 'DATABASE_UNAVAILABLE', 'DEMO_SCHEMA_MISSING', 'DEMO_RECORD_MISSING', 'DRAFT_STALE', 'CLAIM_CLOSED', 'CUSTOMER_VERIFICATION_REQUIRED', 'VERIFICATION_LOCKED', 'CHALLENGE_REQUIRED', 'BROWSER_CONFIRMATION_REQUIRED', 'INVALID_TOOL_ARGUMENTS', 'OFFICIAL_SOURCE_UNAVAILABLE'])
 const codeFor = error => allowedErrors.has(error?.code) ? error.code : 'TOOL_FAILED'
 function send(session, event) {
@@ -14,11 +13,23 @@ function send(session, event) {
   session.socket.send(JSON.stringify({ event_id: `app_${randomBytes(12).toString('hex')}`, ...event }))
 }
 export function checkOrigin(config, origin, site) {
-  if (site === 'cross-site' || !origin || origin !== config.hotlineOrigin) fail('HOTLINE_ACCESS_DENIED', 403)
+  if (site === 'cross-site' || !origin) fail('HOTLINE_ACCESS_DENIED', 403)
+  if (origin === config.hotlineOrigin) return
+  // Loopback aliases are interchangeable only when the configured origin is
+  // itself local. Public domains still require the exact configured origin.
+  try {
+    const incoming = new URL(origin)
+    const configured = new URL(config.hotlineOrigin)
+    const loopback = new Set(['localhost', '127.0.0.1', '[::1]'])
+    if (incoming.origin === origin && configured.origin === config.hotlineOrigin &&
+      loopback.has(incoming.hostname) && loopback.has(configured.hostname) &&
+      ['http:', 'https:'].includes(incoming.protocol) &&
+      incoming.protocol === configured.protocol && incoming.port === configured.port) return
+  } catch { /* Invalid or missing configuration must never allow an origin. */ }
+  fail('HOTLINE_ACCESS_DENIED', 403)
 }
 function configured(config) {
   if (config.hotlineEnabled !== true && config.hotlineEnabled !== 'true') fail('HOTLINE_DISABLED', 503)
-  if (typeof config.hotlineAccessToken !== 'string' || config.hotlineAccessToken.length < 32 || config.hotlineAccessToken.length > 256) fail('HOTLINE_NOT_CONFIGURED', 503)
 }
 export function limit(key, max, period) {
   const now = Date.now()
@@ -30,14 +41,17 @@ export function limit(key, max, period) {
   }
   if (++entry.count > max) fail('HOTLINE_RATE_LIMITED', 429)
 }
-export function authorize(config, token, ip) {
+export function admitBrowser(config, capability, ip) {
   configured(config)
-  limit(`auth:${ip}`, 8, 10 * 60 * 1000)
-  if (typeof token !== 'string' || token.length > 256 || !timingSafeEqual(hash(token), hash(config.hotlineAccessToken))) fail('HOTLINE_ACCESS_DENIED', 403)
+  const existing = owners.get(capability)
+  if (existing && existing.expiresAt > Date.now()) return { capability, created: false }
+  limit(`admit:${ip}`, 30, 10 * 60 * 1000)
   if (owners.size >= 200) fail('HOTLINE_RATE_LIMITED', 429)
-  const capability = randomBytes(32).toString('hex')
-  owners.set(capability, { expiresAt: Date.now() + 60 * 60 * 1000, session: null })
-  return capability
+  const issued = randomBytes(32).toString('hex')
+  // Public admission isolates browser calls; it does not verify a policyholder
+  // or grant access to any customer, claim or supporting document.
+  owners.set(issued, { expiresAt: Date.now() + 60 * 60 * 1000, session: null })
+  return { capability: issued, created: true }
 }
 export function ownerFor(config, capability) {
   configured(config)

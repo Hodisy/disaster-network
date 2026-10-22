@@ -1,7 +1,7 @@
 <script setup>
 const { t } = useAppI18n()
-defineProps({ mode: String, authorized: Boolean, checking: Boolean, accessKey: String, error: String })
-defineEmits(['update:mode', 'update:accessKey', 'unlock'])
+defineProps({ mode: String, authorized: Boolean, checking: Boolean, error: String })
+defineEmits(['update:mode'])
 </script>
 
 <template>
@@ -14,12 +14,9 @@ defineEmits(['update:mode', 'update:accessKey', 'unlock'])
     </div>
     <p>{{ t('Your voice is sent to OpenAI during the call. The assistant is AI; Allstorm and all insurance outcomes are fictional.') }}</p>
     <p>{{ t('In the verified Live dossier, photos and PDFs are saved in PostgreSQL. AI reading sends a selected file to OpenAI only after your agreement. Scripted previews remain local.') }}</p>
-    <p v-if="authorized" class="access-ready" role="status"><UiIcon name="CircleCheck" :size="16" />{{ t('Voice access is unlocked for this browser.') }}</p>
-    <form v-else @submit.prevent="$emit('unlock')">
-      <label for="voice-access-key">{{ t('Workspace access key') }}</label>
-      <div class="unlock-controls"><input id="voice-access-key" type="password" :value="accessKey" :disabled="checking" maxlength="256" autocomplete="off" :placeholder="t('Enter the private workspace access key')" @input="$emit('update:accessKey', $event.target.value)" /><UiButton class="dark" type="submit" :disabled="checking || !accessKey?.trim()">{{ t(checking ? 'Checking access…' : 'Unlock voice access') }}</UiButton></div>
-    </form>
-    <p>{{ t('Access lasts up to one hour in this browser and ends if the server restarts. The secret key is not stored in browser storage.') }}</p>
+    <p v-if="authorized" class="access-ready" role="status"><UiIcon name="CircleCheck" :size="16" />{{ t('Voice calling is ready. No access key is required.') }}</p>
+    <p v-else-if="checking" role="status">{{ t('Preparing voice calling…') }}</p>
+    <p>{{ t('Voice calls are available without a workspace key. Policy verification is still required before accessing customer information.') }}</p>
     <p v-if="error" class="error-message" role="alert">{{ t(error) }}</p>
   </section>
 </template>
@@ -31,10 +28,6 @@ p { margin-top: 10px; font-size: 12px; line-height: 1.8; color: #777780; }
 .mode-controls { display: flex; gap: 8px; margin-top: 18px; }
 .mode-controls button { padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; }
 .mode-controls button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-form { margin-top: 20px; }
-label { display: block; font-size: 12px; margin-bottom: 8px; }
-.unlock-controls { display: flex; gap: 10px; }
-input { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; }
 .access-ready { display: flex; align-items: center; gap: 8px; color: #326743; }
 .error-message { color: #8e4141; }
 </style>

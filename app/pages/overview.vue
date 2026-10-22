@@ -1,11 +1,7 @@
 <script setup>
 definePageMeta({ marketing: true })
 const { locale, setLocale, t } = useAppI18n()
-const { story, portfolio, scenarios } = useMarketingContent()
-const {
-  preview, selectPreview, clearPreview, setPreviewPanel, setPreviewPage,
-  setPreviewView, filterPreview, clearPreviewFilters, togglePreviewFilters, selectPreviewProvider
-} = useMarketingWorkspacePreview()
+const { workspaceImage, story, portfolio, scenarios } = useMarketingContent()
 
 useHead(() => ({
   title: t('Disaster Network — Catastrophe coordination for insurers'),
@@ -19,7 +15,7 @@ useHead(() => ({
     <MarketingHeader :locale="locale" @set-locale="setLocale" />
     <main id="overview-content" tabindex="-1">
       <MarketingHero>
-        <MarketingWorkspacePreview :preview="preview" @select="selectPreview" @clear="clearPreview" @panel="setPreviewPanel" @page="setPreviewPage" @view="setPreviewView" @filter="filterPreview" @clear-filters="clearPreviewFilters" @advanced="togglePreviewFilters" @provider="selectPreviewProvider" @open="navigateTo('/insurer')" />
+        <MarketingWorkspacePreview :image="workspaceImage" />
       </MarketingHero>
       <MarketingJourney :story="story" :portfolio="portfolio" />
       <MarketingScenarios :scenarios="scenarios" />

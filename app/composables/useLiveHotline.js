@@ -2,8 +2,8 @@ import { hotlineRequest } from './useHotlineClaim.js'
 
 const errorPhrases = {
   HOTLINE_DISABLED: 'Live voice is disabled. Enable it in the private server configuration.',
-  HOTLINE_NOT_CONFIGURED: 'Set a private workspace access key and the allowed application origin on the server.',
-  HOTLINE_ACCESS_DENIED: 'Voice access is locked. Open Settings to unlock this browser, or check the configured application origin.',
+  HOTLINE_NOT_CONFIGURED: 'Set the allowed application origin on the server.',
+  HOTLINE_ACCESS_DENIED: 'Voice access could not be prepared. Reload the page and check that its address matches the configured application origin.',
   HOTLINE_RATE_LIMITED: 'Too many requests. Wait ten minutes before trying again.',
   HOTLINE_ALREADY_ACTIVE: 'A voice session is already active. End it before starting another.',
   DATABASE_NOT_CONFIGURED: 'PostgreSQL is not configured. Set the database URL and verified TLS settings.',
@@ -139,7 +139,7 @@ export function useLiveHotline() {
       if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) throw { code: 'WEBRTC_UNAVAILABLE' }
       await restoreAccess()
       if (epoch !== generation) return
-      if (!access.value.authorized) throw { code: 'HOTLINE_ACCESS_DENIED' }
+      if (!access.value.authorized) throw { code: access.value.error || 'HOTLINE_ACCESS_DENIED' }
       // Called only by the explicit orb/start action. Never on mount or mode/language change.
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
       if (epoch !== generation) { stream.getTracks().forEach(track => track.stop()); return }

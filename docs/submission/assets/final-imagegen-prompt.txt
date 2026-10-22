@@ -1,0 +1,41 @@
+Use case: productivity-visual. Create the ENTIRE FINISHED PITCH SLIDE as ONE FLAT IMAGE, landscape 16:9, ideally 1920x1080. This is the actual final slide, not a mockup in a room, not an illustration to add to a slide. Reference image 1 gives the previous layout: keep the very large LEFT typography and the THREE bottom sections, but make the slide considerably leaner. Reference image 2 gives the illustrated insurance cycle: REDRAW IT MUCH SIMPLER, with smaller, more widely separated drawings and more breathing room; do not copy its dense composition or its yellowish lime color. Overall: pure white canvas, clean black sans-serif typography like Inter/Helvetica, exceptionally clear hierarchy, generous margins, professional understated SaaS investor pitch. The ONLY accent color is EXACT HEX #0AF06D, vivid electric green, not yellow-green, sage, teal or dark green. Use this exact accent sparingly for numbered circles, small illustration details and one subtle typographic highlight; keep all reading text black or dark gray.
+
+Composition: roughly 47% LEFT copy, 49% RIGHT circular 4-step visual, small central gap. The bottom 20% is a quiet three-column footer aligned to the left headline and diagram. No cards, pills, charts, dense tables, frames, shaded panels, decorative textures, shadows, gradients, 3D or microscopic footnotes. All text is comfortably readable on stage; no random invented copy. Large headline dominates. Do not crowd the illustration against the text.
+
+LEFT SIDE, exact text and hierarchy:
+Brand at top: "Disaster Network"
+Small clear category: "AI-native insurance operations"
+Huge bold two-line headline:
+"Keep claims moving"
+"when crisis hits."
+Below it, two short lines in medium-size regular dark gray:
+"Automate the first call."
+"Coordinate assistance at scale."
+Below the summary, one compact proof block with no tiny caveats:
+"2/2 valid reassignments"
+"vs 0/2 without capacity data"
+"Synthetic outage benchmark"
+Make the first line bold and the other two readable but subordinate. Keep this block simple.
+
+RIGHT SIDE: a spacious CLOCKWISE CIRCULAR WORKFLOW of FOUR separate small editorial drawings with big easy-to-read numbered circles 1, 2, 3, 4. Curved slender arrows connect the stages clockwise, never crossing the drawings. Flat black-and-white simple line art, white fills, very light gray only if needed, tiny #0AF06D accent details. Simplify drastically: few lines, no shading, no unnecessary objects. Equal visual weight, clearly separated scenes.
+1 UPPER LEFT of the cycle: a HUMAN man holding a telephone, a small damaged house with a broken roof behind him, and a SMALL friendly headset robot he is talking to. Keep the man the main subject, not a giant robot. Put a readable short label "AI hotline".
+2 UPPER RIGHT: a single claim folder and two document pages. Label "Claim file".
+3 LOWER RIGHT: one policy document with a magnifying glass and a small check mark. Label "Policy checks".
+4 LOWER LEFT: a small house with repaired intact roof beside one wrench. NO van, no bushes, no map pins or giant shield. Label "Repair plan".
+In the generous empty center of the cycle, simply write "Aiven PostgreSQL" on two centered lines, dark gray and readable. The diagram explains a conceptual customer-to-operations workflow; do not suggest a real booking or automatic insurance payout.
+
+BOTTOM THREE SECTIONS, modest bold headers, medium-size two-line body, exact wording:
+Left:
+"FOR"
+"Claims and assistance teams"
+"at insurers"
+Middle:
+"WHY NOW"
+"Claim surges outpace teams."
+"Voice agents can now act."
+Right:
+"FIRST USERS"
+"Direct outreach to claims leaders."
+"One regional flood-response pilot."
+
+Keep the visual refined and balanced. No extra disclaimers, logos, watermarks or footer text. The illustration must be much more open and less complex than reference image 2. Use the exact green #0AF06D consistently over the whole slide.

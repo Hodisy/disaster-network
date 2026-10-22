@@ -2,7 +2,7 @@
 const { t } = useAppI18n()
 const { state, speak, stopCall, openClaim } = useDemo()
 const { source, refreshLiveClaim, claimError } = useHotlineClaim()
-const { live, active, access, captionEntries, start, end, interruptSpeech, confirm, playAudio } = useLiveHotline()
+const { live, active, captionEntries, start, end, interruptSpeech, confirm, playAudio } = useLiveHotline()
 const call = computed(() => source.value === 'live' ? { ...live, complete: false, turn: 0 } : state.value.call)
 const orbState = computed(() => ({ listening: 'listening', responding: 'solving', connecting: 'weaving', closing: 'weaving', ready: call.value.complete ? 'searching' : 'weaving', paused: 'searching' })[call.value.phase] || 'searching')
 const label = computed(() => {
@@ -25,7 +25,6 @@ useHead(() => ({ title: t('Hotline — Disaster Network') }))
   <div class="hotline-page">
     <div class="hotline-heading"><h1>{{ t('We are listening.') }}</h1><p>{{ t('Tell us what happened. We will help with the next steps.') }}</p></div>
     <VoiceSession :phase="call.phase" :complete="call.complete" :turn="call.turn" :transcript="call.transcript" :response="call.response" :entries="captionEntries" :transcript-truncated="live.transcriptTruncated" :orb-state="orbState" :label="label" :live="source === 'live'" :microphone-state="live.microphoneState" :busy="source === 'live' && ['connecting', 'closing'].includes(live.phase)" @speak="useOrb" @end="end()" />
-    <NuxtLink v-if="source === 'live' && !active && !access.authorized && !access.checking" to="/settings" class="access-link">{{ t('Configure voice access in Settings') }}</NuxtLink>
     <UiButton v-if="source === 'live' && live.audioBlocked" class="audio-recovery small" @click="playAudio">{{ t('Play assistant audio') }}</UiButton>
     <div v-if="source === 'live' && live.error" class="inline-error" role="alert">{{ t(live.error) }}</div>
     <div v-if="source === 'live' && claimError" class="inline-error" role="alert">{{ t(hotlineErrorPhrase(claimError)) }}</div>
@@ -37,7 +36,6 @@ useHead(() => ({ title: t('Hotline — Disaster Network') }))
 </template>
 
 <style scoped>
-.access-link { display: block; width: fit-content; margin: 18px auto; font-size: 12px; color: #777780; text-decoration: underline; }
 .audio-recovery { display: flex; margin: 18px auto; }
 .live-saved { margin: 20px 0; color: #46755a; font-size: 12px; line-height: 1.6; }
 .inline-error { margin: 16px 0; padding: 12px 15px; color: #a13d3d; background: #fff5f4; border: 1px solid #f1d8d5; border-radius: 8px; font-size: 12px; line-height: 1.6; }

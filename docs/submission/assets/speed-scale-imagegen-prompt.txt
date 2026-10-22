@@ -1,0 +1,19 @@
+Use case: productivity-visual. Generate ONE COMPLETE FINISHED investor pitch SLIDE as a single raster image, landscape 16:9, ideally 1920x1080. This is the actual slide, not a mockup, not a screenshot in a room. White background, black Inter/Helvetica-like typography, lots of breathing room, sharp professional editorial design. The attached previous slide is a reference for the general LEFT TEXT / RIGHT CIRCULAR WORKFLOW / THREE BOTTOM SECTIONS arrangement only. REDUCE THE TEXT AND SIMPLIFY THE DRAWINGS SIGNIFICANTLY. No textures, gradients, shadows, 3D, frames, cards or decorative flourishes.
+
+COLOR RULE: ALL TEXT, including all titles, labels and numeric characters, is pure black or very near black. Never render any text in green. The ONLY accent color is exact HEX #0AF06D. Use it for small numbered-disc backgrounds, underline strokes under the three footer headings, and very small details of illustrations. Number characters remain BLACK. Do not use pale lime, yellow-green, sage, forest or teal.
+
+LEFT COLUMN, about 46% of the slide, generous outer margin. Small brand name at top, exact text: "Disaster Network". Below, ONE large dominant headline with this exact wording on two or three balanced lines: "AI-native insurance operations." and "Built for crisis." No additional subtitle, no explanatory paragraph, no duplicate slogans. Below the headline, one small but clearly readable evidence statement, exact text: "2 missions replanned. Zero capacity conflicts." Then the shorter context label "Synthetic outage benchmark" in readable black. Keep the hierarchy obvious: headline much larger than evidence. No other text on the left.
+
+RIGHT COLUMN: a VERY SIMPLE, OPEN, SPACIOUS circular workflow, four small line drawings positioned at four corners of a wide circle, connected by thin curved black arrows clockwise. Plenty of empty space between scenes and in the center. MUCH LESS detailed than the reference: each scene uses only a few clean black outlines, white fills and at most one tiny electric-green accent. Do not add decorative dots, bushes, van, multiple documents, face details, shadows or intricate buildings.
+Stage 1 at upper left of the cycle: a simple HUMAN man holding a phone, a tiny house with a broken roof behind him, and a very small friendly headset robot indicating his AI phone counterpart. Keep the human recognizable and the composition sparse. A small green numbered disc with black "1". Short BLACK label "Call".
+Stage 2 at upper right: a simple folder with one sheet, nothing else. A small green numbered disc with black "2". BLACK label "Claim".
+Stage 3 at lower right: one document and one simple magnifying glass with a small check, no large shield. A small green numbered disc with black "3". BLACK label "Check".
+Stage 4 at lower left: one small house with an intact roof and one wrench; no van, bushes or extra tools. A small green numbered disc with black "4". BLACK label "Coordinate".
+In the generous EMPTY CENTER of the circular workflow, put just TWO LARGE BLACK WORDS on separate lines: "Speed." then "Scale." Do not put Aiven, PostgreSQL or any technical name anywhere on the slide.
+
+BOTTOM: three clearly separated aligned columns, with generous gutters, no panels. Each heading in bold BLACK uppercase, each with a short clean underline in EXACT #0AF06D immediately beneath it. The body text is BLACK, modest size and easily readable, no tiny footnotes. Exact text, preserving the words:
+LEFT heading "FOR". Body: "Insurers facing claim surges".
+MIDDLE heading "WHY NOW". Body: "Claims surge. Teams cannot scale overnight.".
+RIGHT heading "FIRST USERS". Body: "Direct outreach to claims leaders; one regional pilot".
+
+No other text, no watermarks, no invented logos, no green letters. Exactly one slide. Keep the images small and widely spaced, make the headline and center words dominant, and make this substantially leaner and calmer than the reference.

@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-10-22T11:14:27.441Z",
+  "scope": "Offline deterministic frontend allocation comparison; not an LLM, production or live-service benchmark.",
+  "dataset": {
+    "households": 80,
+    "people": 170,
+    "providers": 10,
+    "initialMissions": 9,
+    "sha256": "82b5cfc95954b68c3e0cb16a2869a2bc7a30379ee44dc84197b749d95ef6db3a"
+  },
+  "sourceSha256": {
+    "app/composables/useInsurerWorkspace.js": "dbd3eb3cdb5edfa9a54efca47cb79b27eda88599eab632cd92226fae3c48aeed",
+    "app/composables/useClaimScenario.js": "1d25d2514147c65894f66f26c7d0734b94b5752113994173ae21258d19a9464d",
+    "app/config/demo.js": "4e44d9f020f2a7a7deb79210281f10ef03e266168c8c4f43c16fe18053495602"
+  },
+  "scenario": "Delta Drying becomes unavailable; two scheduled drying missions require replacement.",
+  "baseline": {
+    "description": "First available matching provider; ignores remaining capacity and property access.",
+    "assignments": [
+      {
+        "missionId": "mission-1",
+        "claimId": "CAT-2026-018",
+        "providerId": "dry-2"
+      },
+      {
+        "missionId": "mission-2",
+        "claimId": "CAT-2026-019",
+        "providerId": "dry-2"
+      }
+    ],
+    "affectedMissions": 2,
+    "feasibleAssignments": 0,
+    "invalidAssignments": 2,
+    "unassignedMissions": 0
+  },
+  "dataAware": {
+    "description": "Shipped useInsurerWorkspace replan and applyPlan; checks availability, matching skill, remaining capacity, access and per-plan reservations.",
+    "assignments": [
+      {
+        "missionId": "mission-1",
+        "claimId": "CAT-2026-018",
+        "providerId": "dry-4",
+        "assumedDelayHours": 2,
+        "assumedCostDeltaEUR": 90
+      },
+      {
+        "missionId": "mission-2",
+        "claimId": "CAT-2026-019",
+        "providerId": "dry-4",
+        "assumedDelayHours": 2,
+        "assumedCostDeltaEUR": 90
+      }
+    ],
+    "affectedMissions": 2,
+    "feasibleAssignments": 2,
+    "invalidAssignments": 0,
+    "unassignedMissions": 0
+  },
+  "integrity": {
+    "planApplied": true,
+    "blockedMissionsPreserved": true,
+    "untouchedMissionsPreserved": true,
+    "blockedMissionCount": 3
+  },
+  "limitations": [
+    "One hand-authored outage on a synthetic portfolio, not statistical generalization.",
+    "Both planners receive the same affected missions; the baseline deliberately lacks capacity/access context.",
+    "Reported delays and mission prices are fixture assumptions, not measured response times or savings.",
+    "No paid voice call, policy-verification or PostgreSQL persistence was exercised.",
+    "This demonstrates the value of resource data and deterministic rules, not superior AI reasoning."
+  ]
+}

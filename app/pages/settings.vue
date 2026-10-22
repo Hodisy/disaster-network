@@ -2,7 +2,7 @@
 const { t, locale, setLocale } = useAppI18n()
 const { pending, confirming, maintenanceKey, error, result, requestReset, cancelReset, resetDatabase, localConfirming, resetLocal } = useDemoSettings()
 const { source } = useHotlineClaim()
-const { access, accessKey, restoreAccess, unlock } = useHotlineAccess()
+const { access, restoreAccess } = useHotlineAccess()
 const { data: insurerData, accessKey: insurerKey, busy: insurerBusy, error: insurerError, restore: restoreInsurer, unlock: unlockInsurer } = useInsurerAgent()
 onMounted(() => { void restoreAccess(); void restoreInsurer() })
 useHead(() => ({ title: t('Settings — Disaster Network') }))
@@ -15,7 +15,7 @@ useHead(() => ({ title: t('Settings — Disaster Network') }))
       <h2>{{ t('Language') }}</h2>
       <LanguageToggle :locale="locale" @change="setLocale" />
     </section>
-    <HotlineSettingsPanel v-model:mode="source" :authorized="access.authorized" :checking="access.checking" v-model:access-key="accessKey" :error="access.error ? hotlineErrorPhrase(access.error) : ''" @unlock="unlock" />
+    <HotlineSettingsPanel v-model:mode="source" :authorized="access.authorized" :checking="access.checking" :error="access.error ? hotlineErrorPhrase(access.error) : ''" />
     <InsurerAgentSettings :authorized="insurerData.authorized" v-model:access-key="insurerKey" :busy="insurerBusy" :error="insurerError" @unlock="unlockInsurer" />
     <LocalDemoResetPanel :confirming="localConfirming" @request="localConfirming = true" @cancel="localConfirming = false" @confirm="resetLocal" />
     <DemoSettingsPanel :pending="pending" :confirming="confirming" v-model:maintenance-key="maintenanceKey" :error="error" :result="result" @request-reset="requestReset" @cancel-reset="cancelReset" @confirm-reset="resetDatabase" />

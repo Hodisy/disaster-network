@@ -1,6 +1,6 @@
 const errorPhrases = {
   CLAIM_ACCESS_EXPIRED: 'Verify your policy on the hotline again to access the documents.',
-  HOTLINE_ACCESS_DENIED: 'Unlock the Live workspace in Settings, then verify your policy on the hotline.',
+  HOTLINE_ACCESS_DENIED: 'Reload the hotline and verify your policy again to access the documents.',
   DOCUMENT_INVALID_SIZE: 'Choose a non-empty file up to 10 MB.',
   DOCUMENT_FORMAT_UNSUPPORTED: 'Choose a JPG, PNG, WebP photo or a PDF.',
   PHOTO_IMAGE_REQUIRED: 'For damage photos, choose a JPG, PNG or WebP image.',

@@ -1,0 +1,9 @@
+Image generation mode: built-in ImageGen. Generated 22 October 2026.
+
+Final asset: docs/submission/output/pitch-slide-image.png
+The user explicitly requested the complete slide as a single image, with a numbered 1-2-3-4 illustrated circular workflow and accent #0af06d. The PowerPoint contains this image alone, full slide, with provenance in speaker notes.
+
+Final prompt summary:
+Generate a finished 16:9 investor pitch slide, white background, large black sans-serif type on the left, a simplified spacious four-step illustrated cycle on the right, and three lean footer sections. Use the supplied previous local slide as a layout reference and the numbered cycle as a style/story reference. Replace yellowish lime/sage with electric green #0AF06D. Stage 1 shows a human caller, damaged house and small headset robot; stage 2 a claim folder; stage 3 policy checks; stage 4 a repaired house and wrench labelled Repair plan. Keep the generated images conceptual: no actual booking or payout. Render exact supplied English copy, actual two-mission synthetic benchmark, Aiven PostgreSQL in the center, and FOR / WHY NOW / FIRST USERS along the bottom. No microscopic footnotes, cards, tables, watermarks or decorative backgrounds.
+
+Earlier assets claim-journey-illustrated.png and claim-cycle-v2.png are superseded reference generations. They are not the final slide.

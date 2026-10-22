@@ -6,21 +6,24 @@ const { t } = useAppI18n()
 
 <template>
   <header class="marketing-header">
-    <a href="#top" class="wordmark"><img src="/brand/disaster-network-mark.svg" alt="" width="28" height="28" /><span>Disaster Network.</span></a>
-    <nav :aria-label="t('Project navigation')">
-      <a href="#jules">{{ t('How it works') }}</a>
-      <a href="#operations">{{ t('Insurer workspace') }}</a>
-      <a href="#scenarios">{{ t('Other scenarios') }}</a>
-    </nav>
-    <div class="header-actions">
-      <LanguageToggle :locale="locale" @change="$emit('set-locale', $event)" />
-      <NuxtLink to="/insurer" class="demo-link">{{ t('Explore the workspace') }}</NuxtLink>
+    <div class="header-inner">
+      <a href="#top" class="wordmark"><img src="/brand/disaster-network-mark.svg" alt="" width="28" height="28" /><span>Disaster Network.</span></a>
+      <nav :aria-label="t('Project navigation')">
+        <a href="#jules">{{ t('How it works') }}</a>
+        <a href="#operations">{{ t('Insurer workspace') }}</a>
+        <a href="#scenarios">{{ t('Other scenarios') }}</a>
+      </nav>
+      <div class="header-actions">
+        <LanguageToggle :locale="locale" @change="$emit('set-locale', $event)" />
+        <NuxtLink to="/hotline" class="demo-link">{{ t('Open hotline') }}</NuxtLink>
+      </div>
     </div>
   </header>
 </template>
 
 <style scoped>
-.marketing-header { position: sticky; top: 0; z-index: 25; display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1264px; min-height: 64px; margin: 0 auto; padding: 0 32px; background: #ffffffed; backdrop-filter: blur(12px); }
+.marketing-header { position: sticky; top: 0; z-index: 25; width: 100%; background: #ffffffed; border-bottom: 1px solid #eeeeed; backdrop-filter: blur(12px); }
+.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1264px; min-height: 64px; margin: 0 auto; padding: 0 32px; }
 .wordmark { display: inline-flex; align-items: center; gap: 9px; font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: -.8px; white-space: nowrap; }
 .wordmark img { display: block; width: 28px; height: 28px; }
 .wordmark span { color: #171719; }

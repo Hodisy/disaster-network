@@ -121,14 +121,14 @@ useHead(() => ({ title: t('Insurer workspace — Disaster Network') }))
 </template>
 
 <style scoped>
-.agent-controls { display: flex; align-items: center; gap: 14px; padding: 8px 24px; min-height: 39px; border-bottom: 1px solid #e7e7ed; font-size: 11px; }
+.agent-controls { display: flex; align-items: center; gap: 14px; padding: 4px 24px; min-height: 31px; border-bottom: 1px solid #e7e7ed; font-size: 11px; }
 .workspace-notice { padding: 7px 24px; font-size: 10px; line-height: 16px; color: #8c713f; background: #fff9ec; border-bottom: 1px solid #f1e6d0; }
 .agent-controls > span { flex: 1; color: #858590; }
 .agent-controls > button, .agent-controls > a { font-size: 10px; text-decoration: underline; }
 .live-report-source { padding: 5px 24px; color: #777781; font-size: 9px; line-height: 14px; border-bottom: 1px solid #e8e8ed; }
 .insurer-page { display: flex; flex: 1; flex-direction: column; min-width: 1050px; min-height: 0; overflow: hidden; background: #fff; }
 .insurer-page > :not(.operations-body) { flex-shrink: 0; }
-.operations-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 24px 14px; }.operations-heading h1 { font-size: 24px; letter-spacing: -0.7px; line-height: 30px; }.operations-heading p { display: flex; align-items: center; gap: 10px; margin-top: 7px; color: #9696a2; font-size: 11px; }.operations-heading p > span { color: #bcbcc4; }
+.operations-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 10px 24px 8px; }.operations-heading h1 { font-size: 24px; letter-spacing: -0.7px; line-height: 30px; }.operations-heading p { display: flex; align-items: center; gap: 10px; margin-top: 3px; color: #9696a2; font-size: 11px; }.operations-heading p > span { color: #bcbcc4; }
 .heading-actions { display: flex; align-items: center; gap: 10px; }.demo-data { border: 1px solid var(--border); border-radius: 20px; color: #9b9ba6; font-size: 9px; padding: 9px 12px; white-space: nowrap; }
 .operations-body { display: flex; flex: 1; align-items: stretch; min-height: 0; overflow: hidden; }
 .map-column { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }

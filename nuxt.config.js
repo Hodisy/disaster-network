@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     demoResetEnabled: false,
     demoResetToken: '',
     hotlineEnabled: false,
-    hotlineAccessToken: '',
     hotlineOrigin: 'http://127.0.0.1:3000',
     openaiApiKey: '',
     openaiLiveModel: 'gpt-live-1',

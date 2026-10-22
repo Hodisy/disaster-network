@@ -1,0 +1,18 @@
+La couche de données en action
+
+Disaster Network aide les assureurs à absorber les pics de sinistres en période de crise, du premier appel à un plan d'assistance priorisé. Les agents exploitent les contrats, les pièces et les ressources à travers un harness commun dans Nuxt/Nitro, connecté à Aiven PostgreSQL.
+
+Données utilisées et stockées
+Le modèle relie customers, policies, claims, documents, document_sections, messages, claim_events, providers et assignments. Il contient les besoins du foyer, la validité et les plafonds du contrat, les clauses, les fichiers et leurs empreintes, les informations extraites, les compétences, positions, capacités et disponibilités des prestataires. Les propositions, traces d'outils, identifiants de modèles et décisions du gestionnaire sont enregistrés avec le dossier. La recherche contractuelle sélectionne le contrat associé et ses clauses, avec références et pages du PDF, sans nécessiter d'embeddings.
+
+De l'appel au dossier documenté
+OpenAI Realtime gère la conversation vocale dans le navigateur via WebRTC. Avant toute lecture des données privées, les outils serveur vérifient le numéro de contrat, le prénom et la réponse au contrôle enregistré. Le harness récupère ensuite le foyer, le contrat, le dossier existant et le contexte de l'incident. Il prépare une déclaration structurée ; la confirmation explicite à l'écran autorise son enregistrement dans PostgreSQL. My claim poursuit le même dossier avec les photos/PDF enregistrés et un contrat PDF téléchargeable.
+
+Des pièces à la proposition assureur
+L'API Responses d'OpenAI lit les photos et PDF transmis avec consentement et produit des catégories de documents, observations et champs de facture structurés. Les règles serveur comparent dates, montants, besoins déclarés et limites contractuelles. L'agent assureur utilise le modèle OpenAI configuré (gpt-6-luna par défaut) pour classifier le dossier, proposer une priorité et des lignes de garantie, signaler les pièces manquantes et recommander des équipes. Ses outils lisent le dossier en base, le PDF contractuel effectivement stocké, les pièces, le portefeuille et les équipes disponibles. Les contrôles serveur imposent les références, compétences, zones d'intervention, capacités disponibles et contraintes d'accès. La validation humaine enregistre la décision et les affectations planifiées éligibles dans PostgreSQL ; les réservations externes et paiements restent hors de ce parcours.
+
+Connecteurs externes
+OpenAI fournit la voix, l'analyse documentaire et le raisonnement assureur. Le connecteur Géorisques GASPAR consulte les arrêtés CatNat par commune et date, avec source et heure de consultation. La recherche web OpenAI optionnelle est limitée à Géorisques, Légifrance, la préfecture des Bouches-du-Rhône et Météo-France, avec citations. OpenFreeMap/MapLibre fournit le fond de carte opérationnel. Un résultat public informe l'examen sans établir à lui seul la couverture.
+
+Évaluation
+La soumission utilise des assurés, contrats et prestataires générés avec des adaptateurs API et des opérations en base réels. Le benchmark de capacité compare deux missions perturbées à une affectation ignorant la capacité restante : zéro contre deux réaffectations réalisables, et deux contre zéro conflit de capacité. Il mesure les règles de planification sur ce scénario, séparément de la qualité des modèles OpenAI.

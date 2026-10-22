@@ -836,5 +836,11 @@
   "Replacement plan": "Plan de remplacement",
   "Close replacement plan": "Fermer le plan de remplacement",
   "Access reviewed": "Accès vérifié",
-  "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.": "Les délais et coûts proposés restent estimatifs. Vérifiez les disponibilités avant application ; la prise en charge et le paiement nécessitent une validation distincte."
+  "Proposed timing and costs remain estimates. Review provider availability before applying; coverage and payment require separate approval.": "Les délais et coûts proposés restent estimatifs. Vérifiez les disponibilités avant application ; la prise en charge et le paiement nécessitent une validation distincte.",
+  "Voice calling is ready. No access key is required.": "Les appels vocaux sont prêts. Aucune clé d’accès n’est nécessaire.",
+  "Preparing voice calling…": "Préparation des appels vocaux…",
+  "Voice calls are available without a workspace key. Policy verification is still required before accessing customer information.": "Les appels vocaux sont accessibles sans clé d’espace de travail. La vérification du contrat reste obligatoire avant l’accès aux informations du client.",
+  "Set the allowed application origin on the server.": "Configurez l’origine autorisée de l’application sur le serveur.",
+  "Voice access could not be prepared. Reload the page and check that its address matches the configured application origin.": "L’accès vocal n’a pas pu être préparé. Rechargez la page et vérifiez que son adresse correspond à l’origine configurée de l’application.",
+  "Reload the hotline and verify your policy again to access the documents.": "Rechargez la hotline et vérifiez à nouveau votre contrat pour accéder aux documents."
 }

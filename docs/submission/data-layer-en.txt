@@ -1,0 +1,13 @@
+The data layer in action
+
+Disaster Network connects a voice claim intake to an insurer's operations workspace. The stack is one Nuxt/Nitro application, PostgreSQL on Aiven, and OpenAI voice with server-controlled tools.
+
+What the agent uses: the caller's first name and policy number, a stored verification challenge, household details, policy limits and source clauses, the existing claim, dated incident context, and the caller's new report. Before successful verification, tools cannot disclose private customer, policy or claim data.
+
+Where it lives: Aiven PostgreSQL contains nine tables in the dedicated disaster_demo schema: customers, policies, claims, documents, document_sections, messages, claim_events, providers and assignments. The small database fixture contains three invented customers, one policy each, four contractual text documents and eleven source sections. Jules's policy is 123456 and his stable claim reference is CAT-2026-001. The documents table supports binary originals, but this fixture uses text, not real insurance PDFs. Policy tools read actual stored sections; no embeddings or claimed vector RAG are involved.
+
+How it flows: browser audio connects to OpenAI over WebRTC after an explicit start action. OpenAI delegates bounded tools to Nitro. A core verifies the caller, repositories read PostgreSQL, and source-backed results return to the voice agent. The agent prepares a report; only the customer's on-screen confirmation authorizes persistence. The same claim is then read in My claim and overlaid on Jules's existing insurer record, without adding another household.
+
+The insurer workspace contains a separate 80-household / 170-person synthetic frontend portfolio with local provider capacity and assignments. Replanning uses availability, service skills, free capacity and property-access constraints. The included benchmark executes these application rules offline against a baseline without capacity context.
+
+Scope: all customer identities, policies and operational resources are invented. Incident context is a versioned local scenario file, not a live weather API. Supporting-file previews and resource actions are local simulations; there is no real upload, booking, payment or automatic coverage approval. Only Jules's explicitly confirmed intake follows the PostgreSQL write path. This is not an 80-customer production deployment.

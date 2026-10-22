@@ -1,5 +1,12 @@
 // Editorial fixtures only; visiting the overview never creates or changes a claim.
 export function useMarketingContent() {
+  // Original concept map artwork; historical legend figures are not portfolio data.
+  const workspaceImage = {
+    src: '/images/marketing/insurer-map-a-clean.png',
+    alt: 'Berre Lagoon map from the original interface concept, with claim markers and a legend.',
+    caption: 'Illustrative map · Original concept'
+  }
+
   const story = {
     name: 'Jules',
     claimId: 'CAT-2026-001',
@@ -72,5 +79,5 @@ export function useMarketingContent() {
     }
   ]
 
-  return { story, portfolio, scenarios }
+  return { workspaceImage, story, portfolio, scenarios }
 }
