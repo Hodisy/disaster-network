@@ -1,0 +1,10 @@
+Thinking Orbs 0.3.2
+Source: npm package thinking-orbs@0.3.2
+Project: https://github.com/Jakubantalik/Libraries.dev/tree/main/packages/thinking-orbs
+Documentation: https://libraries.dev/orbs
+Copyright (c) 2026 Jakub Antalik. MIT license, included in LICENSE.
+
+engine.js is the published dist/engine.es.js (renamed only).
+index-B8WsUNf5.js is the published JavaScript engine chunk (unchanged).
+The Vue canvas lifecycle wrapper is app/components/ThinkingOrb.vue.
+The React wrapper and TypeScript sources are not included.

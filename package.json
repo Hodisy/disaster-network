@@ -1,0 +1,17 @@
+{
+  "name": "disaster-network-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 127.0.0.1",
+    "build": "nuxt build",
+    "preview": "nuxt preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "lucide-vue-next": "1.0.0",
+    "nuxt": "4.6.2"
+  },
+  "devDependencies": {
+    "node": "24.15.0"
+  }
+}

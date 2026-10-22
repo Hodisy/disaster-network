@@ -1,0 +1,17 @@
+node_modules/
+.nuxt/
+.output/
+.data/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# Local setup and source documents stay on this machine.
+AIVEN_SETUP.txt
+CONTEXTE_REPRISE.txt
+Brief_Future_Founders_Data_Centric_Agents.pdf
+
+# Bun is the project package manager.
+package-lock.json
