@@ -76,4 +76,31 @@ blockquote p { color: #898991; font-size: 12px; line-height: 20px; }
 .portfolio-summary dt { font-size: 34px; line-height: 40px; font-weight: 400; letter-spacing: -1px; }
 .portfolio-summary dd { margin: 0; font-size: 12px; line-height: 19px; color: #777; text-align: center; }
 .portfolio-summary > p { margin-top: 20px; text-align: center; font-size: 10px; line-height: 17px; color: #999; }
+@media (max-width: 1000px) {
+  .story-photo { flex-basis: 50%; }
+  .story-photo > img { height: 450px; }
+  .steps li { padding: 24px 20px; }
+}
+@media (max-width: 760px) {
+  .journey { padding: 52px 18px 0; }
+  h2 { margin-top: 18px; font-size: 30px; line-height: 36px; letter-spacing: -.8px; }
+  .section-heading > p { margin-top: 18px; font-size: 15px; line-height: 24px; }
+  .story-row { flex-direction: column; gap: 28px; margin-top: 30px; }
+  .story-photo { flex: none; width: 100%; }
+  .story-photo > img { height: auto; aspect-ratio: 3 / 2; }
+  .voice-story { width: 100%; }
+  .voice-illustration { height: 180px; padding: 10px 16px; }
+  .voice-story > h3 { margin-top: 20px; font-size: 25px; line-height: 31px; }
+  .voice-story > p { margin-top: 12px; }
+  blockquote { gap: 10px; }
+  .journey-link { min-height: 44px; margin-top: 16px; }
+  .steps { flex-direction: column; gap: 14px; margin-top: 30px; }
+  .steps li { padding: 24px; border-radius: 14px; }
+  .steps .step-detail { padding-top: 14px; }
+  .portfolio-band { flex-direction: column; align-items: stretch; gap: 26px; margin-top: 36px; padding: 28px 0; }
+  .portfolio-context h3 { font-size: 25px; line-height: 32px; }
+  .portfolio-summary { flex: none; }
+  .portfolio-summary dl > div { padding: 0 10px; }
+  .portfolio-summary dt { font-size: 30px; line-height: 36px; }
+}
 </style>

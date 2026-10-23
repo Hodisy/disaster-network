@@ -27,4 +27,9 @@ const { t } = useAppI18n()
 figcaption { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 2px 0; font-size: 11px; line-height: 18px; color: #737373; }
 figcaption a { display: inline-flex; align-items: center; color: #363638; }
 figcaption a:hover { color: #737373; }
+@media (max-width: 760px) {
+  .workspace-preview { flex: none; align-self: center; width: 100%; scroll-margin-top: 80px; }
+  .workspace-link { padding: 5px; border-radius: 10px; }
+  figcaption { flex-wrap: wrap; gap: 4px 12px; padding-top: 9px; font-size: 10px; line-height: 16px; }
+}
 </style>

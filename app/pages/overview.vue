@@ -1,5 +1,5 @@
 <script setup>
-definePageMeta({ marketing: true })
+definePageMeta({ marketing: true, alias: ['/'] })
 const { locale, setLocale, t } = useAppI18n()
 const { workspaceImage, story, portfolio, scenarios } = useMarketingContent()
 
@@ -25,7 +25,7 @@ useHead(() => ({
 </template>
 
 <style scoped>
-.marketing-page { min-width: 1120px; min-height: 100%; background: #fff; color: #171719; }
+.marketing-page { width: 100%; min-width: 0; min-height: 100%; background: #fff; color: #171719; }
 .skip-link { position: fixed; z-index: 100; top: -80px; left: 20px; padding: 12px 18px; background: #171719; color: #fff; border-radius: 8px; font-size: 13px; line-height: 20px; }
 .skip-link:focus { top: 12px; }
 </style>

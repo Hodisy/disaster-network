@@ -25,7 +25,6 @@ export default defineNuxtConfig({
     openaiLiveVoice: 'marin'
   },
   css: ['~/assets/css/main.css'],
-  routeRules: { '/': { redirect: '/hotline' } },
   app: {
     head: {
       htmlAttrs: { lang: 'en' },

@@ -41,4 +41,14 @@ dd { margin: 0; color: #777; font-size: 11px; line-height: 18px; }
 .scenario-note { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 30px; margin-top: 35px; }
 .scenario-note > span { color: #888; font-size: 11px; line-height: 20px; }
 .scenario-note > p { max-width: 840px; color: #999; font-size: 11px; line-height: 20px; text-align: center; }
+@media (max-width: 760px) {
+  .scenarios { padding: 56px 18px; }
+  h2 { margin-top: 18px; font-size: 30px; line-height: 36px; letter-spacing: -.8px; }
+  .section-intro { margin-top: 18px; font-size: 15px; line-height: 24px; }
+  .scenario-list { flex-direction: column; gap: 30px; margin-top: 30px; }
+  .scenario, .scenario:nth-child(n+4) { width: 100%; }
+  .scenario > img, .scenario:nth-child(n+4) > img { height: auto; aspect-ratio: 3 / 2; }
+  .scenario-heading { margin-top: 14px; }
+  .scenario-note { margin-top: 20px; padding-top: 20px; }
+}
 </style>

@@ -33,4 +33,14 @@ nav a:hover { color: #737373; }
 .header-actions { display: flex; align-items: center; gap: 22px; }
 .demo-link { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 17px; background: #ededed; border-radius: 24px; font-size: 13px; line-height: 20px; font-weight: 500; white-space: nowrap; }
 .demo-link:hover { background: #dedede; }
+@media (max-width: 1000px) {
+  nav { display: none; }
+}
+@media (max-width: 760px) {
+  .header-inner { gap: 12px; min-height: 64px; padding: 10px 16px; }
+  .wordmark { flex: 1; min-width: 0; gap: 7px; font-size: 17px; letter-spacing: -.7px; }
+  .wordmark img { width: 24px; height: 24px; }
+  nav, .demo-link { display: none; }
+  .header-actions { flex-shrink: 0; gap: 0; }
+}
 </style>

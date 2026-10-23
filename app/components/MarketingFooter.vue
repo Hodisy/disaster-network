@@ -33,4 +33,13 @@ h2 { max-width: 800px; margin: 0 auto; font-size: 40px; line-height: 48px; font-
 .footer-bottom p { margin-top: 12px; color: #929292; font-size: 11px; line-height: 19px; }
 .back-link { display: inline-flex; align-items: center; padding-top: 3px; font-size: 12px; line-height: 20px; color: #737373; white-space: nowrap; }
 .back-link:hover { color: #171719; }
+@media (max-width: 760px) {
+  .closing-inner { padding: 48px 18px; }
+  h2 { font-size: 30px; line-height: 36px; letter-spacing: -.8px; }
+  .closing-inner > p { margin-top: 18px; font-size: 15px; line-height: 24px; }
+  .closing-actions { flex-direction: column; align-items: stretch; gap: 12px; margin-top: 24px; }
+  .primary-link, .secondary-link { white-space: normal; text-align: center; }
+  .footer-bottom { flex-direction: column; gap: 20px; padding: 26px 18px; }
+  .back-link { min-height: 44px; padding-top: 0; }
+}
 </style>
