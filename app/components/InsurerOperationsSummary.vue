@@ -42,4 +42,16 @@ const { t, formatMoney } = useAppI18n()
 .summary-card p { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 4px; font-size: 9px; line-height: 15px; color: #858590; }
 .summary-card b { font-weight: 500; color: #51515d; }
 .summary-card .disrupted { color: #c55b62; }
+
+@media (max-width: 1320px) {
+  .summary-card { padding: 9px 12px; }
+  .card-heading { flex-wrap: wrap; }
+}
+@media (max-width: 1000px) {
+  .operations-summary { overflow-x: auto; scroll-snap-type: x proximity; }
+  .summary-card { flex: 0 0 260px; scroll-snap-align: start; padding: 12px 16px; }
+  .card-heading { min-height: 28px; }
+  .card-heading button { min-height: 28px; }
+}
+
 </style>

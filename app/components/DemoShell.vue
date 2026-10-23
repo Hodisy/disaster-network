@@ -18,7 +18,7 @@ function closeOverlays() {
   <div class="app-shell" :class="{ 'operations-shell': active === 'insurer', 'client-shell': account === 'client' }" @keydown.esc="closeOverlays">
     <a class="skip-link" href="#main-content">{{ t('Skip to content') }}</a>
     <aside class="sidebar">
-      <NuxtLink to="/hotline" class="brand" :aria-label="t('Disaster Network, hotline home')">Disaster Network<span class="brand-period">.</span></NuxtLink>
+      <NuxtLink to="/" class="brand" :aria-label="t('Disaster Network, home')">Disaster Network<span class="brand-period">.</span></NuxtLink>
       <div class="sidebar-label">{{ t(account === 'client' ? 'Client workspace' : 'Insurer workspace') }}</div>
       <nav v-if="account === 'client'" class="main-nav" :aria-label="t('Client navigation')">
         <NuxtLink to="/hotline" :class="{ selected: active === 'hotline' }" :aria-current="active === 'hotline' ? 'page' : undefined"><UiIcon name="Mic" />{{ t('Hotline') }}</NuxtLink>
@@ -88,25 +88,31 @@ function closeOverlays() {
 .icon-button:hover { background: #f1f1f3; color: var(--ink); }
 .icon-button:disabled { opacity: .4; }
 main { flex: 1; min-height: 0; outline: none; }
-/* The client journey has a compact header and two thumb-friendly mobile tabs. */
+@media (max-width: 1000px) {
+  .operations-shell { height: auto; min-height: 100%; overflow: visible; }
+  .operations-shell main { overflow: visible; }
+}
+/* Workspaces share a compact mobile header and thumb-friendly navigation. */
 @media (max-width: 760px) {
-  .client-shell { flex-direction: column; }
-  .client-shell .sidebar { position: sticky; inset: auto; top: 0; width: 100%; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; background: #fffffff5; border-right: 0; border-bottom: 1px solid var(--border); }
-  .client-shell .brand { padding: 0; max-width: calc(100% - 52px); font-size: 19px; line-height: 30px; }
-  .client-shell .sidebar-label { display: none; }
-  .client-shell .main-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; flex-direction: row; gap: 8px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px)); background: #fffffff5; border-top: 1px solid var(--border); }
-  .client-shell .main-nav a { flex: 1; justify-content: center; gap: 10px; padding: 10px; min-height: 44px; font-size: 13px; }
-  .client-shell .sidebar-bottom { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 16px; margin: 0; padding: 0; }
-  .client-shell .account-button { width: 36px; height: 36px; padding: 0; justify-content: center; }
-  .client-shell .account-button > span:nth-child(2), .client-shell .account-button > svg { display: none; }
-  .client-shell .account-popover { top: 44px; right: 0; bottom: auto; left: auto; width: 258px; }
-  .client-shell .workspace { width: 100%; margin-left: 0; padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
-  .client-shell .topbar { height: 46px; padding: 0 16px; }
-  .client-shell .breadcrumb { font-size: 0; gap: 0; }
-  .client-shell .breadcrumb > svg { display: none; }
-  .client-shell .breadcrumb > span { font-size: 12px; }
-  .client-shell .settings-link { width: 36px; height: 36px; }
-  .client-shell .topbar-controls { gap: 12px; }
+  .app-shell { flex-direction: column; }
+  .operations-shell { height: auto; min-height: 100%; overflow: visible; }
+  .operations-shell main { overflow: visible; }
+  .app-shell .sidebar { position: sticky; inset: auto; top: 0; width: 100%; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; background: #fffffff5; border-right: 0; border-bottom: 1px solid var(--border); }
+  .app-shell .brand { padding: 0; max-width: calc(100% - 52px); font-size: 19px; line-height: 30px; }
+  .app-shell .sidebar-label { display: none; }
+  .app-shell .main-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; flex-direction: row; gap: 8px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px)); background: #fffffff5; border-top: 1px solid var(--border); }
+  .app-shell .main-nav a { flex: 1; justify-content: center; gap: 10px; padding: 10px; min-height: 44px; font-size: 13px; }
+  .app-shell .sidebar-bottom { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 16px; margin: 0; padding: 0; }
+  .app-shell .account-button { width: 36px; height: 36px; padding: 0; justify-content: center; }
+  .app-shell .account-button > span:nth-child(2), .app-shell .account-button > svg { display: none; }
+  .app-shell .account-popover { top: 44px; right: 0; bottom: auto; left: auto; width: 258px; }
+  .app-shell .workspace { width: 100%; margin-left: 0; padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .app-shell .topbar { height: 46px; padding: 0 16px; }
+  .app-shell .breadcrumb { font-size: 0; gap: 0; }
+  .app-shell .breadcrumb > svg { display: none; }
+  .app-shell .breadcrumb > span { font-size: 12px; }
+  .app-shell .settings-link { width: 36px; height: 36px; }
+  .app-shell .topbar-controls { gap: 12px; }
 }
 @keyframes pop-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>

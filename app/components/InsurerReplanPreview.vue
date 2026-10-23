@@ -26,4 +26,11 @@ defineEmits(['apply', 'close', 'claim'])
 .comparison { display: flex; gap: 8px; align-items: center; margin-top: 14px; }.comparison > div { display: flex; flex-direction: column; gap: 6px; flex: 1; background: #f5f5f7; padding: 9px; border-radius: 6px; min-width: 0; }.comparison span { font-size: 8px; color: #a0a0ab; }.comparison strong { font-size: 9px; line-height: 14px; font-weight: 500; }.comparison small { font-size: 8px; line-height: 13px; color: #9b9ba6; }.comparison > div.replacement { background: #eef9f2; }.comparison > svg { color: #a4a4ad; }
 .impact-row { display: flex; align-items: center; gap: 9px; padding: 10px 0; border-bottom: 1px solid #eeeef0; font-size: 10px; color: #8c8c98; }.impact-row > span { flex: 1; }.impact-row strong { color: #42424c; font-size: 11px; font-weight: 500; }
 .assumptions { padding: 12px; margin: 8px 0; border-radius: 7px; background: #f5f6fa; color: #9297aa; font-size: 9px; line-height: 16px; }
+
+@media (max-width: 1000px) {
+  .replan-preview { flex: none; overflow: visible; }
+  .affected-name { min-height: 44px; }
+  .replan-preview :deep(.button) { min-height: 44px; }
+}
+
 </style>

@@ -73,4 +73,25 @@ i.P1 { background: #ed4548; }i.P2 { background: #efaa24; }i.P3 { background: #93
 .provider-legend svg { color: #30a76c; }
 .accommodation-total { display: flex; align-items: center; gap: 10px; font-size: 10px; font-weight: 500; margin-left: auto; max-width: 200px; }
 .map-canvas :deep(.maplibregl-ctrl-attrib) { font: 9px -apple-system, BlinkMacSystemFont, sans-serif; }
+
+@media (max-width: 1000px) {
+  .map-region.fit { height: 100%; }
+  .fit .map-surface { min-height: 250px; }
+  .fit .map-legend { gap: 12px; padding: 10px 16px; }
+  .fit .provider-legend { border-left: 0; padding-left: 0; }
+  .fit .accommodation-total { margin-left: 0; max-width: none; }
+}
+@media (max-width: 760px) {
+  .map-caption { left: 8px; top: 8px; max-width: calc(100% - 64px); flex-wrap: wrap; padding: 6px 8px; }
+  .map-caption small { width: 100%; border-left: 0; padding-left: 11px; }
+  .map-controls { top: 8px; right: 8px; }
+  .map-controls button { width: 44px; height: 44px; }
+  .fit .map-legend { gap: 8px 14px; }
+  .fit .priority-items { gap: 10px; }
+  .legend-group { gap: 6px; }
+  .legend-item { gap: 5px; font-size: 9px; }
+  .map-error { padding: 24px; }
+  .map-message { width: max-content; max-width: 85%; font-size: 11px; }
+}
+
 </style>

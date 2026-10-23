@@ -50,4 +50,12 @@ defineEmits(['select', 'page', 'clear'])
 .queue-note { padding: 15px 20px; color: #a0a0aa; font-size: 9px; border-top: 1px solid var(--border); }
 .empty-list { display: flex; align-items: center; flex-direction: column; justify-content: center; flex: 1; gap: 15px; color: #a0a0aa; padding: 30px; text-align: center; }
 .empty-list p { font-size: 12px; line-height: 20px; }.empty-list button { font-size: 11px; text-decoration: underline; }
+
+@media (max-width: 1000px) {
+  .claim-list { flex: none; }
+  .list-rows { flex: none; overflow: visible; }
+  .pagination button { width: 44px; height: 44px; }
+  .claim-row-content small { overflow-wrap: anywhere; }
+}
+
 </style>

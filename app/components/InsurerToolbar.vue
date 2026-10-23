@@ -5,7 +5,7 @@ defineEmits(['view', 'filter', 'advanced', 'clear'])
 </script>
 
 <template>
-  <div class="operations-toolbar">
+  <div class="operations-toolbar" :class="{ expanded: advanced }">
     <div class="primary-row">
       <div class="view-tabs" role="tablist" :aria-label="t('Workspace view')">
         <button v-for="tab in ['situation', 'mobilization']" :key="tab" role="tab" :aria-selected="view === tab" :class="{ active: view === tab }" @click="$emit('view', tab)">{{ t(tab === 'situation' ? 'Situation' : 'Mobilization') }}</button>
@@ -44,4 +44,26 @@ select { min-width: 84px; max-width: 140px; height: 34px; padding: 0 9px; border
 .advanced-row select { max-width: 230px; }
 .clear-button { font-size: 10px; color: #666671; text-decoration: underline; }
 .filter-note { margin-left: auto; }
+
+@media (max-width: 1320px) {
+  .primary-row { flex-wrap: wrap; padding: 8px 16px; }
+  .view-tabs { min-height: 36px; margin-right: 0; }
+  .search-field { flex-basis: 150px; }
+  .advanced-row { flex-wrap: wrap; padding: 4px 16px 12px; }
+  .filter-note { margin-left: 0; }
+}
+@media (max-width: 760px) {
+  .view-tabs { flex: 1; min-height: 44px; }
+  .view-tabs button { flex: 1; }
+  .search-field { flex: 1 0 100%; min-height: 44px; order: 2; }
+  .search-field input { font-size: 16px; }
+  select { flex: 1 1 40%; min-width: 0; max-width: none; height: 44px; font-size: 12px; }
+  .primary-row > select { display: none; order: 3; }
+  .expanded .primary-row > select { display: block; }
+  .more-button { width: 44px; height: 44px; }
+  .advanced-row > span { width: 100%; }
+  .advanced-row select { max-width: none; }
+  .clear-button { min-height: 44px; }
+}
+
 </style>

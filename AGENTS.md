@@ -144,3 +144,7 @@ The user explicitly authorized responsive hotline/client access and iPhone Home 
 ## Mobile landing and home route — 23 October 2026
 
 The user also requested the same responsive release workflow for the marketing landing. `/` is an alias of the existing `/overview` page, with no automatic redirect to the client workspace. Marketing components may use mobile breakpoints while preserving their reference imagery, translations and desktop appearance. The primary entry remains `/hotline`, with `/client` for claim messages; no separate inbox product is introduced. The installed web app still starts directly at `/hotline`. This follow-up includes the same commit, merge, push, existing Aiven deployment and public responsive checks; no paid voice test.
+
+## Mobile insurer and workspace home link — 23 October 2026
+
+The user extended the responsive release to `/insurer` and requested that the workspace brand return to the marketing page at `/`. This supersedes the earlier desktop-only insurer restriction. Preserve the existing harness, data, permissions and operational actions; adapt layouts, controls and panels only. The same scoped commit, push, existing Aiven deployment, build and public responsive verification are authorized. Do not make paid AI/voice calls or mutate business data during verification.

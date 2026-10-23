@@ -42,4 +42,13 @@ ul { padding-left: 18px; } details { font-size: 11px; border-top: 1px solid #e6e
 .human-review { display: flex; flex-direction: column; gap: 12px; padding-top: 17px; border-top: 1px solid #e5e5eb; } .human-review > label:first-child { font-size: 12px; }
 textarea { width: 100%; resize: vertical; border: 1px solid #dedee5; padding: 10px; border-radius: 8px; font-size: 12px; }
 .review-actions { display: flex; gap: 12px; } .recorded { padding: 12px; border-radius: 8px; background: #f0f6f2; color: #487058; }
+
+@media (max-width: 760px) {
+  .agent-review { min-width: 0; overflow-wrap: anywhere; }
+  .line > div, .refund-total { flex-wrap: wrap; }
+  .review-actions { flex-direction: column; }
+  .review-actions :deep(.button) { min-height: 44px; }
+  textarea { font-size: 16px; }
+}
+
 </style>

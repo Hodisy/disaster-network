@@ -45,7 +45,7 @@ bun install
 bun run dev
 ```
 
-Open the address printed in the terminal, normally [http://127.0.0.1:3000/hotline](http://127.0.0.1:3000/hotline). `/` redirects to `/hotline`.
+Open the address printed in the terminal, normally [http://127.0.0.1:3000/hotline](http://127.0.0.1:3000/hotline). `/` opens the marketing landing; `/hotline` opens the client workspace.
 
 With a loopback `NUXT_HOTLINE_ORIGIN`, voice, document and insurer origin checks also accept `localhost`, `127.0.0.1` and `[::1]` on the same protocol and port. Public origins still require an exact match. Cookies remain separate for each hostname, so changing hostname starts a separate browser call context and requires policy verification again for dossier access. This origin-alias change has not been checked with a build or browser call.
 
@@ -323,3 +323,7 @@ Source and assets prepared on `codex/mobile-hotline` from the current `main`. Pr
 ## Responsive landing and default entry — 23 October 2026
 
 The marketing page is served at both `/` and `/overview` through a page alias. The former root redirect to `/hotline` is removed. The header, hero, map illustration, Jules journey, steps, portfolio summary, scenario cards and footer adapt to narrow screens, retaining existing assets and EN/FR content. Buttons enter the existing hotline or insurer workspace; there is no separate `/inbox` route, and client messages remain in My claim. The installed Home Screen app retains its direct `/hotline` start URL. No backend workflow or customer data changes are included.
+
+## Responsive insurer workspace — 23 October 2026
+
+The workspace brand links to `/`. On smaller screens the insurer map sits above the operational panels, summary cards scroll horizontally, filters wrap and lists use the page scroll instead of clipped desktop panes. Mobile workspace navigation uses the same compact header as the client journey. Existing harness tools, access gates, portfolio figures and approval rules are unchanged.

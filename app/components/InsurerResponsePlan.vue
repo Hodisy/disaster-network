@@ -46,4 +46,11 @@ h3 { flex: 1; font-size: 12px; font-weight: 550; }
 footer { flex-shrink: 0; padding: 12px 16px; border-top: 1px solid var(--border); }
 footer :deep(.button) { width: 100%; justify-content: space-between; }
 footer p, .empty-plan { font-size: 9px; line-height: 15px; color: #94949f; margin-top: 8px; }
+
+@media (max-width: 1000px) {
+  .response-plan { flex: none; }
+  .plan-scroll { flex: none; overflow: visible; }
+  .service-card > button { min-height: 44px; font-size: 12px; }
+}
+
 </style>

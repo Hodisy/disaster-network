@@ -137,4 +137,38 @@ useHead(() => ({ title: t('Insurer workspace — Disaster Network') }))
 .operation-notice { display: flex; align-items: center; gap: 10px; padding: 11px 24px; border-bottom: 1px solid #f4dbdf; background: #fff5f5; color: #b8787f; font-size: 10px; }.operation-notice > span { flex: 1; }.operation-notice button { display: flex; align-items: center; gap: 6px; font-size: 10px; }.operation-notice.applied { color: #5f9b76; background: #f1fbf5; border-color: #d4ecdd; }
 .operation-error { padding: 12px 24px; color: #bb6871; background: #fff4f4; font-size: 11px; border-bottom: 1px solid #f1dddd; }
 .report-body { display: flex; flex-direction: column; gap: 14px; padding: 5px; }.report-label { width: fit-content; color: #9c9ca7; background: #f3f3f5; border-radius: 5px; padding: 6px 9px; font-size: 10px; }.report-body > p { color: #9c9ca7; font-size: 11px; line-height: 19px; }.report-body pre { white-space: pre-wrap; overflow-wrap: anywhere; color: #747481; font: 12px/23px -apple-system, BlinkMacSystemFont, sans-serif; background: #f7f7f9; padding: 18px; margin: 0; border-radius: 8px; }.report-body :deep(.button) { align-self: flex-start; }
+
+@media (max-width: 1320px) {
+  .insurer-page { min-width: 0; }
+  .operations-panel { width: 340px; }
+  .operations-heading { flex-wrap: wrap; gap: 8px; }
+  .heading-actions { flex-wrap: wrap; }
+  .agent-controls { flex-wrap: wrap; gap: 8px 14px; }
+  .agent-controls > span { flex-basis: 100%; }
+}
+@media (max-width: 1000px) {
+  .insurer-page { overflow: visible; flex: none; width: 100%; }
+  .operations-body { flex: none; flex-direction: column; overflow: visible; }
+  .map-column { flex: none; height: 420px; }
+  .operations-panel { width: 100%; flex: none; overflow: visible; border-left: 0; border-top: 1px solid var(--border); }
+  .panel-content { flex: none; }
+  .panel-tabs { padding: 0 8px; }
+  .panel-tabs button { min-height: 44px; }
+  .operations-heading p { flex-wrap: wrap; gap: 4px 8px; }
+}
+@media (max-width: 760px) {
+  .operations-heading { padding: 16px; }
+  .operations-heading h1 { font-size: 22px; line-height: 28px; }
+  .heading-actions { width: 100%; justify-content: space-between; gap: 8px; }
+  .heading-actions :deep(.button) { min-height: 44px; padding: 10px 12px; }
+  .agent-controls { padding: 8px 16px; gap: 4px 12px; }
+  .agent-controls > button, .agent-controls > a { display: inline-flex; align-items: center; min-height: 36px; text-align: left; }
+  .agent-controls :deep(.button) { min-height: 40px; }
+  .map-column { height: 390px; }
+  .workspace-notice, .operation-error, .operation-notice { padding: 10px 16px; overflow-wrap: anywhere; }
+  .operation-notice { flex-wrap: wrap; }
+  .operation-notice button { min-height: 36px; }
+  .report-body pre { padding: 12px; font-size: 11px; line-height: 20px; }
+}
+
 </style>

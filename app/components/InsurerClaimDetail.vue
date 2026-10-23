@@ -37,4 +37,13 @@ defineEmits(['back', 'plan', 'permit-access', 'accommodate', 'schedule', 'client
 .mission-item { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 7px; border: 1px solid #ebebee; border-radius: 7px; padding: 9px; margin-top: 8px; }.mission-item strong { font-size: 10px; font-weight: 500; color: #70707d; }.mission-item > span { color: #b28c45; font-size: 9px; }.mission-item small { width: 100%; font-size: 9px; color: #aaaab4; }
 .activity-entry { display: flex; align-items: flex-start; gap: 10px; margin-top: 11px; font-size: 10px; line-height: 16px; color: #747480; }.activity-entry > i { width: 6px; height: 6px; border-radius: 50%; background: #898994; flex-shrink: 0; margin-top: 4px; }.activity-entry small { display: block; color: #a2a2ac; font-size: 9px; }
 .detail-actions { display: flex; flex-direction: column; gap: 9px; border-top: 1px solid var(--border); padding-top: 15px; }.detail-actions p { color: #aaaab3; font-size: 9px; line-height: 15px; }
+
+@media (max-width: 1000px) {
+  .claim-detail { flex: none; overflow: visible; }
+  .back-button, .text-action { min-height: 44px; }
+  .info-row, .key-value { flex-wrap: wrap; }
+  .detail-actions :deep(.button) { min-height: 44px; }
+  .detail-section li, .activity-entry { overflow-wrap: anywhere; }
+}
+
 </style>

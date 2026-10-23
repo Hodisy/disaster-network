@@ -37,4 +37,13 @@ defineEmits(['provider', 'claim'])
 .provider-missions { padding: 14px 21px; border-top: 1px solid var(--border); }.mission-heading { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; margin-bottom: 10px; }.mission-heading strong { font-weight: 500; }.mission-heading button { color: #92929e; text-decoration: underline; font-size: 9px; }.provider-missions > p { font-size: 10px; color: #a1a1ac; }
 .assignment { display: flex; align-items: center; gap: 15px; width: 100%; border-top: 1px solid #f0f0f3; padding: 10px 0; text-align: left; font-size: 10px; color: #797987; }.assignment > span:first-child { flex: 1; }.assignment small { display: block; font-size: 9px; color: #a0a0ab; margin-top: 4px; }
 .resource-note { font-size: 9px; color: #aaaab4; padding: 12px 21px; }
+
+@media (max-width: 1000px) {
+  .resources.embedded { flex: none; overflow: visible; }
+  .provider-row > span { min-width: 0; overflow-wrap: anywhere; }
+  .embedded .provider-row > span { font-size: 10px; }
+  .embedded .provider-row > span:last-child { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .assignment { min-height: 44px; }
+}
+
 </style>
