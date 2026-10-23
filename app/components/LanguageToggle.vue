@@ -17,4 +17,7 @@ const { t } = useAppI18n()
 .language-toggle button:hover { color: var(--ink); background: #ededec; }
 .language-toggle button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px #00000012; }
 .language-toggle button:focus-visible { outline: 2px solid #74747c; outline-offset: 2px; }
+@media (max-width: 760px) {
+  .language-toggle button { min-width: 36px; min-height: 36px; }
+}
 </style>

@@ -36,4 +36,11 @@ dl { margin: 16px 0; font-size: 12px; line-height: 1.7; }
 dl > div { display: flex; gap: 14px; padding: 5px 0; }
 dt { width: 165px; flex-shrink: 0; color: #85858e; }
 dd { flex: 1; margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .report-review { padding: 16px; }
+  blockquote { margin: 16px 0; padding: 4px 10px; }
+  dl > div { flex-direction: column; gap: 2px; padding: 7px 0; }
+  dt { width: auto; }
+  .report-review :deep(.button) { width: 100%; min-height: 44px; white-space: normal; }
+}
 </style>

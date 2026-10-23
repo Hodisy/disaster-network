@@ -54,4 +54,7 @@ defineProps({ claim: Object, steps: Array, stepDescriptions: Array })
 .claim-details { width: 330px; flex-shrink: 0; }
 .detail-section dt { width: 92px; flex-shrink: 0; }
 .detail-section dd { flex: 1; min-width: 0; }
+@media (max-width: 760px) {
+  .claim-details { width: 100%; border-left: 0; border-top: 1px solid var(--border); }
+}
 </style>

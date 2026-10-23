@@ -35,4 +35,11 @@ header p { margin-top: 8px; font-size: 13px; color: #80808a; line-height: 1.8; }
 .settings-page > section + section { margin-top: 18px; }
 .language-settings { display: flex; align-items: center; justify-content: space-between; padding: 20px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
 .language-settings h2 { font-size: 14px; font-weight: 600; }
+@media (max-width: 760px) {
+  .settings-page { padding: 24px 16px; }
+  header { margin-bottom: 20px; }
+}
+@media (max-width: 760px) {
+  .settings-page :deep(input:not([type='checkbox'])), .settings-page :deep(textarea) { font-size: 16px; min-width: 0; }
+}
 </style>

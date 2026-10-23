@@ -147,6 +147,7 @@ export function useLiveHotline() {
       const connection = new RTCPeerConnection()
       peer = connection
       audio = new Audio(); audio.autoplay = true
+      audio.setAttribute('playsinline', '')
       connection.addEventListener('track', event => {
         if (epoch !== generation || !audio) return
         audio.srcObject = event.streams[0] || new MediaStream([event.track])

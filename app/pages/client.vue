@@ -86,4 +86,16 @@ useHead(() => ({ title: t('My claim — Disaster Network') }))
 .empty-page p { color: #888893; font-size: 13px; line-height: 1.8; }
 .empty-page small { color: #aaaab2; font-size: 10px; margin-top: 4px; }
 .claim-activity { flex: 1; }
+@media (max-width: 760px) {
+  .claim-page-heading { flex-direction: column; gap: 8px; padding: 20px 16px; }
+  .claim-page-heading h1 { font-size: 24px; }
+  .claim-date { padding-top: 0; }
+  .claim-workspace { flex-direction: column; }
+  .claim-activity { padding: 20px 16px; }
+  .timeline-event { gap: 10px; }
+  .event-heading { flex-wrap: wrap; }
+  .event-heading > span { white-space: normal; }
+  .empty-page { min-height: 0; padding: 48px 20px; }
+  .claim-activity :deep(textarea) { font-size: 16px; }
+}
 </style>

@@ -83,4 +83,18 @@ defineEmits(['speak', 'end'])
 @keyframes typing { 0%, 70%, 100% { opacity: .4; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-3px); } }
 @keyframes soft-pulse { 50% { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .listening-dot, .typing-dots i { animation: none; } .orb-button canvas, .orb-hover-icon { transition: none; } }
+@media (max-width: 760px) {
+  .orb-stage { padding-top: 0; }
+  .orb-button { width: 248px; height: 248px; }
+  .orb-button :deep(canvas) { width: 224px !important; height: 224px !important; }
+  .orb-hover-icon { opacity: 1; transform: none; width: 44px; height: 44px; }
+  .voice-state { padding: 0 8px; text-align: center; font-size: 13px; line-height: 20px; }
+  .call-controls { min-height: 44px; margin-top: 6px; }
+  .end-call { width: 44px; height: 44px; }
+  .conversation { margin-top: 22px; }
+  .conversation-heading { font-size: 15px; padding-bottom: 12px; }
+  .utterance { gap: 12px; padding: 17px 0; }
+  .avatar.tiny, .adviser-mark { width: 32px; height: 32px; }
+  .utterance p { font-size: 14px; line-height: 22px; }
+}
 </style>

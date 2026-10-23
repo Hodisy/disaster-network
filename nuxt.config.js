@@ -30,8 +30,19 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'en' },
       title: 'Disaster Network — Support for your insurance claim',
-      link: [{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/brand/disaster-network-mark.svg' }],
-      meta: [{ name: 'description', content: 'Insurance claim coordination with optional AI voice and verified document collection. Synthetic evaluation scenario.' }]
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/brand/disaster-network-mark.svg' },
+        { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/brand/apple-touch-icon.png' }
+      ],
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        { name: 'theme-color', content: '#ffffff' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-title', content: 'Disaster Network' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+        { name: 'description', content: 'Insurance claim coordination with optional AI voice and verified document collection. Synthetic evaluation scenario.' }
+      ]
     }
   }
 })

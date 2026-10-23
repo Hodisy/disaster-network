@@ -30,4 +30,9 @@ p { margin-top: 10px; font-size: 12px; line-height: 1.8; color: #777780; }
 .mode-controls button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .access-ready { display: flex; align-items: center; gap: 8px; color: #326743; }
 .error-message { color: #8e4141; }
+@media (max-width: 760px) {
+  .settings-panel { padding: 18px; }
+  .mode-controls { flex-direction: column; }
+  .mode-controls button { min-height: 44px; }
+}
 </style>

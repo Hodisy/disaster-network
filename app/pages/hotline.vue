@@ -46,4 +46,12 @@ useHead(() => ({ title: t('Hotline — Disaster Network') }))
 .claim-ready { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 15px; padding: 17px 0; border-top: 1px solid var(--border); }
 .claim-ready > span { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #686872; }
 .claim-ready > span svg { color: #39ac6b; }
+@media (max-width: 760px) {
+  .hotline-page { width: 100%; padding: 20px 18px 24px; }
+  .hotline-heading h1 { font-size: 28px; line-height: 35px; letter-spacing: -.8px; }
+  .hotline-heading p { font-size: 14px; line-height: 22px; }
+  .claim-ready { flex-direction: column; align-items: stretch; gap: 12px; }
+  .claim-ready > span { line-height: 19px; }
+  .audio-recovery { min-height: 44px; white-space: normal; }
+}
 </style>
