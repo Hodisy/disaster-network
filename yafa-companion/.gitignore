@@ -1,0 +1,20 @@
+node_modules/
+.nuxt/
+.output/
+.env
+.env.*
+!.env.example
+.DS_Store
+
+memory-service/target/
+
+backend/bin/
+
+!backend/.env.audio-lab.example
+
+# Local caches, private workspaces and temporary media.
+__pycache__/
+*.pyc
+*.blend[0-9]
+.private/
+video/yafa-film/editor/public/media/temp/
